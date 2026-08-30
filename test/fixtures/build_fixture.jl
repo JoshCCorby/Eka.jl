@@ -1,0 +1,48 @@
+module FixtureData
+
+using SQLite, DBInterface
+
+# Invented scores for software tests, not predictions or licensed source data.
+const ROWS = [
+    ("Al2Ba2O7Si1", 0.74232),
+    ("Al2O12Si3Zn3", 0.48140),
+    ("Al1Li1O12Si5", 0.41613),
+    ("Al2Ba3O14Si4", 0.39355),
+    ("Al2O14Si4Sr3", 0.34611),
+    ("Zn1Mg3", 0.39168),
+    ("Zn1Mg2", 0.37147),
+    ("Mg1Zn4", 0.26386),
+    ("Zn1Mg1", 0.30000),
+    ("Mg2Zn2", 0.30000),
+    ("Na1Cl1O1", 0.50000),
+    ("N1Cl1O1", 0.50000),
+]
+
+function build_fixture(path)
+    ispath(path) && throw(ArgumentError("refusing to overwrite existing fixture: $path"))
+    db = SQLite.DB(path)
+    try
+        DBInterface.transaction(db) do
+            DBInterface.execute(db, "CREATE TABLE compositions (composition TEXT NOT NULL, score REAL NOT NULL)")
+            statement = SQLite.Stmt(db, "INSERT INTO compositions (composition, score) VALUES (?, ?)")
+            try
+                for row in ROWS
+                    DBInterface.execute(statement, row)
+                end
+            finally
+                DBInterface.close!(statement)
+            end
+            DBInterface.execute(db, "CREATE INDEX compositions_score_idx ON compositions(score)")
+        end
+    finally
+        DBInterface.close!(db)
+    end
+    return path
+end
+
+end
+
+if abspath(PROGRAM_FILE) == @__FILE__
+    destination = isempty(ARGS) ? joinpath(@__DIR__, "tiny_test.db") : only(ARGS)
+    println(FixtureData.build_fixture(destination))
+end

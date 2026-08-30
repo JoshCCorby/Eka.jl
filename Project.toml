@@ -1,0 +1,28 @@
+name = "Eka"
+uuid = "c7a2c8e1-9a94-4aec-99d6-21468f025a93"
+version = "0.1.0"
+authors = ["Joshua Corbett"]
+
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+DBInterface = "a10d1c49-ce27-4219-8d33-6db1a4562965"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+SQLite = "0aa819cd-b072-5ff4-a722-6bc24af294d9"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[compat]
+ArgParse = "1"
+DBInterface = "2"
+Printf = "1"
+PrecompileTools = "1"
+SQLite = "1"
+SHA = "0.7, 1"
+julia = "1.10"
+
+[extras]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Random", "Test"]

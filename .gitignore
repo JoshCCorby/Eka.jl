@@ -1,0 +1,14 @@
+# Downloaded scientific data must not be committed accidentally.
+recommender-2024-07-01.sqlite
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+!test/fixtures/tiny_test.db
+
+# Resolve dependencies from Project.toml when consuming the library.
+Manifest.toml
+coverage/
+*.cov
+*.mem
+.DS_Store
