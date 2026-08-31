@@ -5,6 +5,7 @@ module Eka
 
 using SQLite
 using DBInterface
+using JSON3
 using ArgParse
 using Printf
 using SHA

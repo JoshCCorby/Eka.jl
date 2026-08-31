@@ -1,5 +1,7 @@
 import importlib.util
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
 
@@ -43,6 +45,29 @@ class ReleaseAuditTests(unittest.TestCase):
     def test_dot_path_is_normalized_without_hiding_parent_traversal(self):
         self.assertEqual("src/Eka.jl", release.normalize_path("src/./Eka.jl"))
         self.assertEqual("../secret", release.normalize_path("../secret"))
+
+    def test_archive_rejects_symlink_members(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
+            (root / "regular.txt").write_text("reviewed source", encoding="utf-8")
+            (root / "external-secret").symlink_to("/etc/passwd")
+            subprocess.run(["git", "add", "regular.txt", "external-secret"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "fixture"], cwd=root, check=True)
+
+            entries, modes, problems = release.archive_entries(root, "HEAD")
+            result = release.audit_entries(
+                entries,
+                require_metadata=False,
+                modes=modes,
+                structural_problems=problems,
+            )
+            self.assertEqual("fail", result["status"])
+            self.assertIn("external-secret (symbolic link)", "\n".join(result["problems"]))
+            self.assertRegex(result["files"][0]["mode"], r"^0[0-7]{3}$")
+            self.assertEqual("regular file", result["files"][0]["type"])
 
 
 if __name__ == "__main__":

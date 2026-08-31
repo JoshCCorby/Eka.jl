@@ -119,9 +119,11 @@ Source IDs are retained, including a count of records without them. Missing flag
 are not converted to true. Unresolved groups must be excluded from the initial
 recovery pool unless their evidence is subsequently resolved.
 
-The audit verifies saved file hashes and schema, not upstream authenticity or a
-semantic round trip between arbitrary user-edited JSON and TSV. Use the exporter
-to create the TSV; do not manually alter it after export.
+The audit verifies the complete exporter metadata contract, both saved file hashes,
+and that every preserved JSONL record independently normalizes to the corresponding
+TSV row. This detects edits that update one file and its hash without making the
+preserved records and normalized inputs agree. It does not establish upstream
+authenticity or permission to redistribute the data.
 
 The grouped file is intentionally **not** input to `eka benchmark`: that existing
 command has a binary-outcome contract. There is no `outcome=0` for unlabelled here.

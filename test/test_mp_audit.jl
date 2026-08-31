@@ -3,12 +3,52 @@ function mp_test_snapshot(dir, body; overrides=Dict{String,Any}())
     mkdir(snapshot)
     bytes = Eka.MP_AUDIT_HEADER * "\n" * body
     write(joinpath(snapshot, "records.tsv"), bytes)
-    # Synthetic provenance carrier; parser/normalizer is independently tested in Python.
-    raw = "{\"is_synthetic\":true}\n"
+    documents = Dict{String,Any}[]
+    for line in split(chomp(body), '\n'; keepempty=false)
+        fields = split(line, '\t')
+        if length(fields) != 5
+            push!(documents, Dict("material_id" => "mp-malformed", "composition" => Dict("Ca" => 1,
+                "Ti" => 1, "O" => 3), "formula_pretty" => "synthetic", "theoretical" => false,
+                "database_IDs" => Dict{String,Vector{String}}(), "deprecated" => false))
+            continue
+        end
+        id, formula_value, flag, sources, issue = fields
+        composition = if issue == "fractional_counts"
+            Dict("O" => 1.5)
+        elseif formula_value == "."
+            nothing
+        else
+            Dict(match.captures[1] =>
+                    (isempty(match.captures[2]) ? 1 : parse(Int, match.captures[2]))
+                for match in eachmatch(r"([A-Z][a-z]?)([0-9]*)", formula_value))
+        end
+        database_ids = Dict{String,Vector{String}}()
+        if sources != "."
+            for entry in split(sources, ';')
+                source, source_id = split(entry, ':'; limit=2)
+                push!(get!(database_ids, source, String[]), source_id)
+            end
+        end
+        push!(documents, Dict("material_id" => id, "composition" => composition,
+            "formula_pretty" => "synthetic", "theoretical" =>
+                flag == "unknown" ? nothing : flag == "true",
+            "database_IDs" => database_ids, "deprecated" => false))
+    end
+    raw = join((JSON3.write(document) for document in documents), '\n') *
+        (isempty(documents) ? "" : "\n")
     write(joinpath(snapshot, "records.jsonl"), raw)
     metadata = Dict{String,Any}("schema_version" => 1, "database_version" => "synthetic-v1",
         "query_include_gnome" => false, "query_deprecated" => false,
         "query_elements" => ["O"], "query_num_elements" => 3, "is_synthetic" => true,
+        "dataset" => "Materials Project",
+        "endpoint" => "https://api.materialsproject.org/materials/summary/",
+        "scope" => "oxygen-containing ternaries; not oxidation-state-validated oxides",
+        "fields" => Eka.MP_SNAPSHOT_FIELDS, "retrieved_at_utc" => "2026-01-01T00:00:00+00:00",
+        "mp_api_version" => "synthetic", "python_version" => "3.11.0",
+        "exporter_sha256" => repeat("0", 64),
+        "normalization" => "exact positive integral element counts only; Julia reduces ratios",
+        "date_policy" => "no first-discovery dates inferred from database timestamps",
+        "terms_url" => "https://materialsproject.org/about/terms",
         "redistribution_status" => "synthetic test fixture", "record_count" => count(==('\n'), body),
         "records_sha256" => bytes2hex(sha256(bytes)), "jsonl_sha256" => bytes2hex(sha256(raw)))
     merge!(metadata, overrides)
@@ -94,12 +134,39 @@ end
     for overrides in (Dict("schema_version" => 2), Dict("query_include_gnome" => true),
             Dict("record_count" => 100), Dict("jsonl_sha256" => "bad"),
             Dict("query_elements" => ["F"]), Dict("is_synthetic" => "false"),
-            Dict("redistribution_status" => ""))
+            Dict("redistribution_status" => ""), Dict("dataset" => "Elsewhere"),
+            Dict("fields" => ["material_id"]), Dict("exporter_sha256" => "unknown"))
         mktempdir() do dir
             snapshot = mp_test_snapshot(dir, body; overrides)
             @test_throws ArgumentError audit_mp_snapshot(snapshot, joinpath(dir, "audit"))
             @test !ispath(joinpath(dir, "audit"))
         end
+    end
+    for missing_key in ("dataset", "endpoint", "fields", "retrieved_at_utc",
+            "mp_api_version", "python_version", "exporter_sha256", "terms_url")
+        mktempdir() do dir
+            snapshot = mp_test_snapshot(dir, body)
+            metadata = TOML.parsefile(joinpath(snapshot, "snapshot.toml"))
+            delete!(metadata, missing_key)
+            open(joinpath(snapshot, "snapshot.toml"), "w") do io
+                TOML.print(io, metadata; sorted=true)
+            end
+            @test_throws ArgumentError audit_mp_snapshot(snapshot, joinpath(dir, "audit"))
+        end
+    end
+    mktempdir() do dir
+        snapshot = mp_test_snapshot(dir, body)
+        raw_path = joinpath(snapshot, "records.jsonl")
+        documents = [JSON3.read(line, Dict{String,Any}) for line in eachline(raw_path)]
+        documents[1]["theoretical"] = true
+        raw = join((JSON3.write(document) for document in documents), '\n') * "\n"
+        write(raw_path, raw)
+        metadata = TOML.parsefile(joinpath(snapshot, "snapshot.toml"))
+        metadata["jsonl_sha256"] = bytes2hex(sha256(raw))
+        open(joinpath(snapshot, "snapshot.toml"), "w") do io
+            TOML.print(io, metadata; sorted=true)
+        end
+        @test_throws ArgumentError audit_mp_snapshot(snapshot, joinpath(dir, "audit"))
     end
     for bad in ("mp-1\tCaTiO3\tfalse\t.\t.\nmp-1\tCaTiO3\tfalse\t.\t.\n",
             "mp-1\tCaTiO3\t0\t.\t.\n", "mp-1\tCaTiO3\ttrue\t.\n", "")

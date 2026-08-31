@@ -31,14 +31,15 @@ The audit builds the actual Git archive and fails on:
 - local data, report, bot or activity-log paths;
 - unreviewed JSONL/SQLite/database files, except the documented tiny fixture;
 - environment files and `Manifest.toml`;
+- symbolic links, hard links and other special archive members;
 - private-key markers and common GitHub, AWS and literal MP API-key forms;
 - machine-specific home paths, files over the review limit, missing licence,
   notice/citation metadata, or absent MP/Seko attribution.
 
-The JSON output records every archive member's size and SHA-256 plus a manifest
-hash. It is a content-control aid, not a guarantee that arbitrary secrets or all
-legal issues can be recognized automatically. CI runs the audit and its focused
-tests on every push and pull request.
+The JSON output records every regular archive member's type, mode, size and
+SHA-256 plus a manifest hash. It is a content-control aid, not a guarantee that
+arbitrary secrets or all legal issues can be recognized automatically. CI runs
+the audit and its focused tests on every push and pull request.
 
 ## Terms and decision
 

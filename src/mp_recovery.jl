@@ -155,9 +155,8 @@ function recovery_verified_inputs(snapshot, audit; synthetic)
         throw(ArgumentError("snapshot exporter hash differs from the current exporter"))
     supplied = recovery_toml(files["audit/audit.toml"], "audit")
     groups = recovery_group_rows(files["audit/compositions.tsv"])
-    # Reaudit captured bytes, not mutable input paths. Existing audit code verifies
+    # Reaudit captured bytes, not mutable input paths. Current audit code verifies
     # snapshot schema, record/jsonl hashes, query filters and record normalization.
-    # It is left unchanged to preserve the Day 1 implementation hashes.
     mktempdir() do temporary
         copied = joinpath(temporary, "snapshot")
         mkdir(copied)
@@ -171,7 +170,12 @@ function recovery_verified_inputs(snapshot, audit; synthetic)
             get(supplied, key, nothing) isa String && !isempty(supplied[key]) ||
                 throw(ArgumentError("audit must record $key"))
         end
-        stable(d) = Dict(k => v for (k, v) in d if !(k in ("julia_version", "package_version")))
+        # The real v1 input pins the complete historical audit.toml hash above.
+        # Permit its recorded implementation hash to remain historical while the
+        # current audit must reproduce every scientific/schema/provenance field.
+        runtime_keys = synthetic ? ("julia_version", "package_version") :
+            ("julia_version", "package_version", "audit_code_sha256")
+        stable(d) = Dict(k => v for (k, v) in d if !(k in runtime_keys))
         stable(supplied) == stable(rebuilt.summary) || throw(ArgumentError("audit metadata/counts/code hashes differ from rebuilt audit"))
         groups == recovery_group_rows(read(joinpath(rebuilt.path, "compositions.tsv"))) ||
             throw(ArgumentError("audited groups differ from snapshot records"))

@@ -1,4 +1,105 @@
 const MP_AUDIT_HEADER = "material_id\tcomposition\ttheoretical\tsource_ids\tnormalization_issue"
+const MP_SNAPSHOT_FIELDS = ["material_id", "composition", "formula_pretty", "theoretical",
+    "database_IDs", "deprecated"]
+const MP_SNAPSHOT_STRINGS = Dict(
+    "dataset" => "Materials Project",
+    "endpoint" => "https://api.materialsproject.org/materials/summary/",
+    "scope" => "oxygen-containing ternaries; not oxidation-state-validated oxides",
+    "normalization" => "exact positive integral element counts only; Julia reduces ratios",
+    "date_policy" => "no first-discovery dates inferred from database timestamps",
+    "terms_url" => "https://materialsproject.org/about/terms",
+)
+
+function mp_checked_cell(value)
+    text = string(value)
+    !isempty(text) && !any(c -> c in ('\t', '\r', '\n'), text) ||
+        throw(ArgumentError("invalid empty or multiline field in records.jsonl"))
+    return text
+end
+
+function mp_json_formula(amounts)
+    amounts isa JSON3.Object && !isempty(amounts) || return ".", "missing_composition"
+    terms = String[]
+    for symbol in sort!(String.(collect(keys(amounts))))
+        occursin(r"\A[A-Z][a-z]?\z", symbol) || return ".", "unsupported_species"
+        raw = amounts[Symbol(symbol)]
+        raw isa Bool && return ".", "invalid_counts"
+        raw isa Number || return ".", "invalid_counts"
+        value = try
+            BigFloat(raw)
+        catch
+            return ".", "invalid_counts"
+        end
+        isfinite(value) && value > 0 || return ".", "invalid_counts"
+        isinteger(value) || return ".", "fractional_counts"
+        value <= typemax(Int64) || return ".", "count_overflow"
+        push!(terms, symbol * string(Int64(value)))
+    end
+    return join(terms), "."
+end
+
+function mp_json_row(document)
+    document isa JSON3.Object || throw(ArgumentError("records.jsonl entries must be objects"))
+    material_id = get(document, :material_id, nothing)
+    material_id isa String && occursin(r"\Amp-(?:[0-9]+|[a-z]+)\z", material_id) ||
+        throw(ArgumentError("invalid material_id in records.jsonl"))
+    formula_value, issue = mp_json_formula(get(document, :composition, nothing))
+    theoretical = get(document, :theoretical, nothing)
+    theoretical === nothing || theoretical isa Bool ||
+        throw(ArgumentError("invalid theoretical flag in records.jsonl"))
+    flag = theoretical === nothing ? "unknown" : lowercase(string(theoretical))
+    source_ids = get(document, :database_IDs, nothing)
+    source_ids === nothing || source_ids isa JSON3.Object ||
+        throw(ArgumentError("invalid database_IDs in records.jsonl"))
+    sources = String[]
+    if source_ids !== nothing
+        for source in keys(source_ids)
+            ids = source_ids[source]
+            ids isa JSON3.Array && all(id -> id isa String, ids) ||
+                throw(ArgumentError("invalid source identifiers in records.jsonl"))
+            append!(sources, string(source) * ":" * id for id in ids)
+        end
+    end
+    get(document, :deprecated, nothing) === false ||
+        throw(ArgumentError("records.jsonl contains deprecated or unspecified record"))
+    sources_value = isempty(sources) ? "." : join(sort!(unique!(sources)), ';')
+    return Tuple(mp_checked_cell(value) for value in
+        (material_id, formula_value, flag, sources_value, issue))
+end
+
+function mp_json_rows(raw_bytes)
+    rows = NTuple{5,String}[]
+    for (line_number, line) in enumerate(eachline(IOBuffer(raw_bytes)))
+        isempty(line) && throw(ArgumentError("blank line $line_number in records.jsonl"))
+        document = try
+            JSON3.read(line)
+        catch
+            throw(ArgumentError("invalid JSON on records.jsonl line $line_number"))
+        end
+        push!(rows, mp_json_row(document))
+    end
+    isempty(rows) && throw(ArgumentError("records.jsonl is empty"))
+    return rows
+end
+
+function mp_formula_signature(value::String)
+    occursin(r"\A(?:[A-Z][a-z]?(?:[1-9][0-9]*)?)+\z", value) || return nothing
+    counts = Dict{String,BigInt}()
+    for token in eachmatch(r"([A-Z][a-z]?)([0-9]*)", value)
+        symbol = String(token.captures[1])
+        amount = isempty(token.captures[2]) ? big(1) : parse(BigInt, token.captures[2])
+        counts[symbol] = get(counts, symbol, big(0)) + amount
+    end
+    divisor = reduce(gcd, values(counts))
+    return Tuple(symbol => div(counts[symbol], divisor) for symbol in sort!(collect(keys(counts))))
+end
+
+function mp_rows_match(normalized::NTuple{5,String}, saved::NTuple{5,String})
+    all(normalized[index] == saved[index] for index in (1, 3, 4, 5)) || return false
+    normalized[5] == "." || return normalized[2] == saved[2]
+    normalized_signature = mp_formula_signature(normalized[2])
+    return normalized_signature !== nothing && normalized_signature == mp_formula_signature(saved[2])
+end
 
 """
     audit_mp_snapshot(snapshot, output)
@@ -25,10 +126,19 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
     get(metadata, "query_elements", nothing) == ["O"] || throw(ArgumentError("snapshot must query oxygen"))
     get(metadata, "query_num_elements", nothing) === 3 || throw(ArgumentError("snapshot must query ternaries"))
     get(metadata, "is_synthetic", nothing) isa Bool || throw(ArgumentError("snapshot must declare is_synthetic"))
-    for key in ("database_version", "redistribution_status")
+    get(metadata, "fields", nothing) == MP_SNAPSHOT_FIELDS ||
+        throw(ArgumentError("snapshot must declare the selected MP fields"))
+    for (key, expected) in MP_SNAPSHOT_STRINGS
+        get(metadata, key, nothing) == expected || throw(ArgumentError("snapshot has invalid or missing $key"))
+    end
+    for key in ("database_version", "redistribution_status", "retrieved_at_utc",
+            "mp_api_version", "python_version")
         value = get(metadata, key, nothing)
         value isa String && !isempty(strip(value)) || throw(ArgumentError("snapshot must declare $key"))
     end
+    exporter_hash = get(metadata, "exporter_sha256", nothing)
+    exporter_hash isa String && occursin(r"\A[0-9a-f]{64}\z", exporter_hash) ||
+        throw(ArgumentError("snapshot must declare a valid exporter_sha256"))
     records_bytes = read(joinpath(snapshot, "records.tsv"))
     bytes2hex(sha256(records_bytes)) == get(metadata, "records_sha256", nothing) ||
         throw(ArgumentError("records.tsv SHA-256 does not match snapshot metadata"))
@@ -39,6 +149,13 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
         throw(ArgumentError("records.jsonl SHA-256 does not match snapshot metadata"))
     rows = benchmark_table(records_bytes, MP_AUDIT_HEADER, "MP snapshot")
     isempty(rows) && throw(ArgumentError("snapshot is empty"))
+    normalized_rows = mp_json_rows(raw_bytes)
+    length(normalized_rows) == length(rows) ||
+        throw(ArgumentError("records.jsonl count does not match records.tsv"))
+    for index in eachindex(rows)
+        mp_rows_match(normalized_rows[index], Tuple(String.(rows[index]))) ||
+            throw(ArgumentError("records.jsonl does not normalize to records.tsv row $index"))
+    end
     count_value = get(metadata, "record_count", nothing)
     count_value isa Integer && !(count_value isa Bool) && count_value == length(rows) ||
         throw(ArgumentError("snapshot record_count does not match records.tsv"))

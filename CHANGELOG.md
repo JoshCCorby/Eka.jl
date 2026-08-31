@@ -9,3 +9,5 @@
   comparator with independent output validation.
 - Add MIT licensing, scoped third-party notices, citation metadata and a
   source-release content audit.
+- Reconcile preserved MP JSONL records with normalized TSV inputs during audit,
+  enforce the exporter metadata contract, and reject special release members.

@@ -1,4 +1,4 @@
-using Test, Random, Eka, SQLite, DBInterface
+using Test, Random, Eka, SQLite, DBInterface, JSON3
 
 const FIXTURE = joinpath(@__DIR__, "fixtures", "tiny_test.db")
 include("fixtures/build_fixture.jl")
