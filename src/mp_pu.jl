@@ -42,8 +42,7 @@ function load_mp_recovery(bundle::AbstractString, snapshot::AbstractString, audi
     end
     protocol = capture("provenance/protocol.md")
     pu_check(bytes2hex(sha256(protocol)) == MP_RECOVERY_PROTOCOL_SHA256, "bundle protocol hash mismatch")
-    pu_check(bytes2hex(sha256(read(joinpath(@__DIR__, "..", "docs", "mp-recovery-protocol.md")))) ==
-        MP_RECOVERY_PROTOCOL_SHA256, "installed protocol differs from frozen contract")
+    recovery_protocol(MP_RECOVERY_PROTOCOL)
     source = recovery_verified_inputs(snapshot, audit; synthetic)
     expected = mp_recovery_splits(source.groups; seeds, budgets)
     inputs = Dict(name => bytes2hex(sha256(bytes)) for (name, bytes) in source.files)

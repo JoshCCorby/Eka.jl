@@ -6,9 +6,10 @@ declared budget: random, training-only element popularity, and maximum
 training-composition similarity. Joshua Corbett is the author of this
 implementation and documentation.
 
-All three primary methods declared by the protocol are now implemented. Real
-rankings are still deferred until the planned implementation freeze, so every
-result produced so far is a synthetic software check and not scientific evidence.
+All three primary methods declared by the protocol are implemented. The full real
+pilot has now completed after the implementation freeze, with all scientific
+outputs reproduced exactly from a clean checkout. Results remain local; see the
+[evidence and restore guide](mp-pilot-reproduction.md).
 External scores are **not** a method here; the
 [external score review](mp-external-score-provenance.md) records that decision.
 The [frozen protocol](mp-recovery-protocol.md) remains the unchanged pre-evaluation
@@ -170,8 +171,14 @@ not claim success merely because one method wins. The paired primary comparison
 (similarity minus popularity hits at k=100 on each identical split) is computed
 during analysis from these raw per-split rows; `benchmark_pu` deliberately writes
 the inputs to that comparison rather than a summary verdict. The implementation
-commit/dependency freeze and the real experiment are still outstanding. The
+freeze, real experiment, paired report and clean-checkout reproduction are now
+complete locally. `scripts/analyze_pu_pilot.py` independently validates saved
+outputs and generates the predefined paired and descriptive summaries. The
 [data handling restrictions](mp-data-provenance-review.md) still apply.
+
+The follow-on [label-sensitivity workflow](mp-label-sensitivity.md) is separately
+versioned and does not change this v1 runner or its scientific outputs. Its
+original-policy controls verify exact compatibility with the preserved pilot.
 
 ## Runtime and memory
 

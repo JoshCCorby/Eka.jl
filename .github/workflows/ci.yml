@@ -47,3 +47,6 @@ jobs:
           julia --project=. bin/eka audit-mp --snapshot "$RUNNER_TEMP/pu-snapshot" --output "$RUNNER_TEMP/pu-audit"
           julia --project=. bin/eka split-mp --snapshot "$RUNNER_TEMP/pu-snapshot" --audit "$RUNNER_TEMP/pu-audit" --output "$RUNNER_TEMP/pu-splits" --synthetic --budget 1 4
           julia --project=. bin/eka benchmark-pu --splits "$RUNNER_TEMP/pu-splits" --snapshot "$RUNNER_TEMP/pu-snapshot" --audit "$RUNNER_TEMP/pu-audit" --output "$RUNNER_TEMP/pu-results" --synthetic
+          python scripts/analyze_pu_pilot.py "$RUNNER_TEMP/pu-results" "$RUNNER_TEMP/pu-analysis"
+          python -m unittest discover -s test -p 'test_pu_analysis.py' -v
+          python -m unittest discover -s test -p 'test_label_sensitivity_analysis.py' -v

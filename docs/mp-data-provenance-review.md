@@ -4,6 +4,12 @@ Reviewed 31 August 2026 for the [recovery protocol](mp-recovery-protocol.md).
 **Decision: continue the local pilot; redistribution is not cleared.** This is a
 research handling record, not a legal opinion or blanket licence grant.
 
+Follow-up on 31 August 2026: the [publication-permissions register](publication-permissions.md)
+now records each proposed artifact category, dependency evidence and remaining
+owner/provider decisions. The official terms page remained on browser security
+verification. A clarification request is drafted locally but has not been sent;
+no field or derivative has been cleared by assuming a missing permission grant.
+
 ## Provenance interpretation
 
 The installed emmet-core 0.87.2 `emmet/core/provenance.py` and the upstream `main`

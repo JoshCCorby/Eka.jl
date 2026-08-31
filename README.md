@@ -77,7 +77,9 @@ outcomes to the separate binary benchmark above.
 | Day 2: composition splits | `eka split-mp` generates deterministic holdouts, verifies provenance, and separates ranker inputs from evaluation labels; [split guide](docs/mp-recovery-splits.md) |
 | Day 3: PU baseline evaluator | `eka benchmark-pu` verifies complete split bundles and evaluates random and training-only popularity; [evaluation guide](docs/mp-pu-evaluation.md) |
 | Day 4: similarity comparator | Maximum training-composition similarity is implemented, streamed and benchmarked; external scores are excluded from the primary comparison by the [score provenance review](docs/mp-external-score-provenance.md) |
-| Implementation freeze and real evaluation | Pending; no real-data PU rankings or recovery metrics have been run |
+| Frozen pilot and reproduction | Complete locally: all 20 splits, three methods and four budgets; full clean-checkout reproduction passed; [evidence and restore guide](docs/mp-pilot-reproduction.md) |
+| Label sensitivity | Frozen evaluation-only and full-pipeline analyses completed and reproduced locally; [workflow and checks](docs/mp-label-sensitivity.md) |
+| Sharing review | [Permissions register](docs/publication-permissions.md) prepared; applicable MP terms and code-licence decision remain unresolved |
 
 To try the complete pipeline without an API key or private data, follow the
 [offline synthetic example](docs/mp-pu-evaluation.md#offline-end-to-end-example).
@@ -92,7 +94,8 @@ The [MP pilot guide](docs/mp-pilot.md) covers API setup and export/audit command
 Real snapshots and detailed derived reports remain local and ignored by Git;
 redistribution questions remain unresolved in the
 [data/provenance review](docs/mp-data-provenance-review.md). The
-[one-week roadmap](docs/one-week-roadmap.md) records the planned sequence. The frozen
+[revised recovery roadmap](docs/recovery-roadmap.md) records progress and the next
+gates; the [one-week roadmap](docs/one-week-roadmap.md) preserves the original plan. The frozen
 protocol is a historical pre-evaluation record: statements there about unavailable
 commands describe the freeze date, not the current CLI.
 
@@ -295,15 +298,19 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 | `scripts/export_mp_pilot.py`, `src/mp_audit.jl` | MP snapshot export, provenance audit, and composition grouping |
 | `src/mp_recovery.jl` | Deterministic PU splits and preserved provenance |
 | `src/mp_pu.jl` | Split verification, training-only ranking methods, recovery metrics, and reports |
+| `scripts/analyze_pu_pilot.py` | Independent saved-output validation and predefined descriptive pilot analysis |
+| `src/mp_label_sensitivity.jl`, `scripts/run_label_sensitivity.jl` | Separately versioned label-policy membership, fixed-ranking evaluation, and full-pipeline sensitivity |
+| `scripts/analyze_label_sensitivity.py` | Independent sensitivity validation, policy comparisons, and population reporting |
 | `src/cli.jl`, `bin/eka` | Command parsing/output; only `bin/eka` exits the process |
 
-Next is the implementation and dependency freeze, then the real experiment and
-its paired analysis. External scores stay outside the primary comparison until a
+The frozen pilot and label-sensitivity analyses are complete and reproduced
+locally. Next is system-holdout design across the retained label policies, alongside
+the unresolved sharing review. External scores stay outside the primary comparison until a
 new protocol version can establish training independence. Isotope
 representation and additional scored-source adapters remain separate backlog
 items; model training and tensor factorization remain out of scope. See the
 [original design notes](docs/design.md) for SQLite engineering context and the
-[roadmap](docs/one-week-roadmap.md) for the recovery pilot sequence.
+[revised roadmap](docs/recovery-roadmap.md) for the recovery project sequence.
 
 ## Author and research attribution
 

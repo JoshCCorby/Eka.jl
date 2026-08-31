@@ -14,4 +14,5 @@ include("fixtures/build_fixture.jl")
     include("test_mp_audit.jl")
     include("test_mp_recovery.jl")
     include("test_mp_pu.jl")
+    include("test_mp_label_sensitivity.jl")
 end

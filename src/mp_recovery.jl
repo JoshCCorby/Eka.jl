@@ -4,6 +4,21 @@ const MP_RECOVERY_ALGORITHM = "eka-pu-split-v1"
 const MP_RECOVERY_SCOPE = "oxygen-containing ternaries; not oxidation-state-validated oxides"
 const MP_RECOVERY_GROUP_HEADER = "composition\tchemical_system\tlabel\trecord_count\texperimental_records\ttheoretical_records\tunknown_records\tmaterial_ids\tsource_ids"
 const MP_RECOVERY_PROTOCOL_SHA256 = "f64c1fb803da3cc57aff658341b299824e3d662cc48039586a8bc10410bab21f"
+# Explicit versioned pins; retaining the v1 alias preserves its public identity.
+const MP_RECOVERY_PROTOCOLS = (
+    "eka-mp-recovery-v1" => (file="mp-recovery-protocol.md", sha256=MP_RECOVERY_PROTOCOL_SHA256),
+    "eka-mp-label-sensitivity-v1" => (file="mp-label-sensitivity-protocol.md",
+        sha256="f577444465292b6f1099e2650eec22106aebfb2ce3b970b86a5a037bc578a09f"),
+)
+
+function recovery_protocol(id::AbstractString)
+    index = findfirst(pair -> first(pair) == id, MP_RECOVERY_PROTOCOLS)
+    index === nothing && throw(ArgumentError("unknown recovery protocol: $id"))
+    pin = last(MP_RECOVERY_PROTOCOLS[index])
+    bytes = read(joinpath(@__DIR__, "..", "docs", pin.file))
+    bytes2hex(sha256(bytes)) == pin.sha256 || throw(ArgumentError("protocol document differs from frozen $id contract"))
+    return (; id, pin.file, pin.sha256, bytes)
+end
 # These identities are frozen in docs/mp-recovery-protocol.md, not inferred from
 # whichever metadata the caller supplies. New real data requires a new protocol.
 const MP_RECOVERY_INPUT_HASHES = (
@@ -194,9 +209,7 @@ function split_mp_recovery(snapshot::AbstractString, audit::AbstractString, outp
     if !synthetic && (seeds != collect(0:19) || budgets != [20, 50, 100, 200])
         throw(ArgumentError("real recovery must use frozen seeds 0:19 and budgets 20,50,100,200"))
     end
-    protocol_bytes = read(joinpath(@__DIR__, "..", "docs", "mp-recovery-protocol.md"))
-    bytes2hex(sha256(protocol_bytes)) == MP_RECOVERY_PROTOCOL_SHA256 ||
-        throw(ArgumentError("protocol document differs from the frozen v1 contract"))
+    protocol_bytes = recovery_protocol(MP_RECOVERY_PROTOCOL).bytes
     source = recovery_verified_inputs(snapshot, audit; synthetic)
     result = mp_recovery_splits(source.groups; seeds, budgets)
     # Preserve the exact relevant source bytes, including a dirty implementation,
