@@ -1,13 +1,16 @@
-# Verified positive–unlabelled baseline evaluation
+# Verified positive–unlabelled recovery evaluation
 
-Day 3 adds `eka benchmark-pu`, separate from the existing binary `eka benchmark`.
-It verifies saved split bundles, then evaluates random and training-only element
-popularity at every declared budget. Joshua Corbett is the author of this
+`eka benchmark-pu` is separate from the existing binary `eka benchmark`. It
+verifies saved split bundles, then evaluates every declared method at every
+declared budget: random, training-only element popularity, and maximum
+training-composition similarity. Joshua Corbett is the author of this
 implementation and documentation.
 
-This is a **baseline-only milestone**. The similarity comparator and its primary
-paired comparison remain Day 4 work. Real rankings are deferred until the planned
-implementation freeze. Synthetic test results are not scientific evidence.
+All three primary methods declared by the protocol are now implemented. Real
+rankings are still deferred until the planned implementation freeze, so every
+result produced so far is a synthetic software check and not scientific evidence.
+External scores are **not** a method here; the
+[external score review](mp-external-score-provenance.md) records that decision.
 The [frozen protocol](mp-recovery-protocol.md) remains the unchanged pre-evaluation
 record; its statement that the CLI was not yet available describes the freeze date.
 
@@ -36,10 +39,11 @@ julia --project=. bin/eka benchmark-pu \
   --synthetic
 ```
 
-The example has 20 splits, two methods and two budgets, producing 80 metric rows.
-Every split contains eight training positives, two held-out positives and four
-candidates. These arbitrary fixtures test software, not physical plausibility.
-Both methods use identical candidate membership within each split.
+The example has 20 splits, three methods and two budgets, producing 120 metric
+rows. Every split contains eight training positives, two held-out positives and
+four candidates. These arbitrary fixtures test software, not physical
+plausibility. All three methods use identical candidate membership within each
+split.
 
 The CLI accepts `--splits`, `--snapshot`, `--audit`, `--output`, and explicit
 `--synthetic` mode. Budgets and all three kinds of seed come from the verified
@@ -84,7 +88,7 @@ using Eka
 
 training = ["CaTiO3", "BaTiO3"]
 candidates = ["MgTiO3", "SrTiO3", "CaZrO3", "MgAl2O4"]
-ranked = pu_rank(training, candidates; method="popularity",
+ranked = pu_rank(training, candidates; method="similarity",
                  ranking_seed=10000, tie_seed=20260901)
 # Arbitrary synthetic heldout example; evaluator data is not passed to pu_rank.
 metrics = pu_metrics([r.composition for r in ranked], ["SrTiO3"]; budgets=[1, 4])
@@ -100,10 +104,28 @@ Counts are rebuilt per call; unseen elements contribute zero. Oxygen contributes
 a constant 1/3 in this ternary pool. Scores are finite Float64 values, ordered
 descending with the frozen score-independent hash tie policy.
 
+Similarity scores each candidate by the **maximum** cosine similarity of its
+reduced element-count vector to any single training composition:
+`max(dot(c,t) / (norm(c) * norm(t)) for t in training)`, clamped to [0,1]. It is
+the pairwise cosine Eka's `similarity` already computes, maximised over the
+training set; the tests assert exact Float64 equality with that function rather
+than a tolerance. No reference is chosen using held-out labels, there is no atom
+weighting, learned embedding, oxidation feature, fitting step, or search over
+similarity variants, and the stored-score tie breaker of the SQLite
+`SimilarityRanking` path is **not** inherited. Ordering uses the same frozen
+score-independent hash tie policy as popularity.
+
+References are rebuilt from the training argument on every call, so per-split
+training isolation holds by construction and a candidate's score depends on the
+training set alone, never on the rest of the candidate pool. Comparisons are
+streamed one candidate at a time: peak working memory is proportional to the
+number of compositions, and no candidate-by-training matrix is ever allocated.
+
 Random ranks by the ascending exact SHA-256 key from the protocol, then shared
 tie key and formula. It has no fitted numeric score: the saved score cell is
-empty, and `random_key` records the exact ordering key. Popularity's `random_key`
-cell is empty. Both retain `tie_key`. Neither method consults evaluator labels.
+empty, and `random_key` records the exact ordering key. The popularity and
+similarity `random_key` cells are empty. All three methods retain `tie_key`, and
+none of them consults evaluator labels.
 
 `pu_metrics` accepts a complete, duplicate-free ordering and a nonempty held-out
 subset. Every holdout must appear in the ordering. Invalid budgets and zero
@@ -131,8 +153,8 @@ accuracy, significance test or population confidence interval is computed.
 | --- | --- |
 | `config.toml` | Protocol and input hashes, methods/budgets/seeds, runtime versions, source/dependency-file hashes, deterministic output hashes |
 | `metrics.tsv` | Every method × split × budget, with raw counts and metric denominators |
-| `split-XX/random.tsv`, `popularity.tsv` | Complete ranks, canonical formulas, scores/keys, and labels attached **after** ranking |
-| `report.md` | All metric rows and interpretation limits; prominently identifies synthetic/baseline-only status |
+| `split-XX/random.tsv`, `popularity.tsv`, `similarity.tsv` | Complete ranks, canonical formulas, scores/keys, and labels attached **after** ranking |
+| `report.md` | All metric rows and interpretation limits; prominently identifies synthetic status |
 | `runtime.tsv` | Ranking seconds for every method/split, including any first-call compilation |
 | `inputs/` | Captured bundle manifests, membership and provenance used by the evaluator |
 | `implementation/` | Relevant current code, Project.toml, and Manifest.toml when present |
@@ -144,9 +166,39 @@ only `runtime.tsv`; scientific outputs and deterministic configuration should
 match under the same source bytes, inputs and environment.
 
 The report distinguishes split sensitivity from independent experiments. It does
-not claim success merely because one baseline wins. Day 5 still needs the full
-primary comparison, implementation commit/dependency freeze and real experiment.
-The [data handling restrictions](mp-data-provenance-review.md) still apply.
+not claim success merely because one method wins. The paired primary comparison
+(similarity minus popularity hits at k=100 on each identical split) is computed
+during analysis from these raw per-split rows; `benchmark_pu` deliberately writes
+the inputs to that comparison rather than a summary verdict. The implementation
+commit/dependency freeze and the real experiment are still outstanding. The
+[data handling restrictions](mp-data-provenance-review.md) still apply.
+
+## Runtime and memory
+
+The frozen protocol implies about 35.2 million candidate/training pairs per split
+(4,288 training positives x 8,218 candidates). `scripts/benchmark_pu_similarity.jl`
+measures that size on generated formulas only; it reads no snapshot, split
+bundle, MP record, or label, and produces no recovery result.
+
+```sh
+julia --startup-file=no --project=. scripts/benchmark_pu_similarity.jl
+```
+
+Measured on Julia 1.12.6, macOS, Apple silicon, 31 August 2026:
+
+| Step | Time | Allocated |
+| --- | ---: | ---: |
+| Streamed maximum similarity, 35.2M pairs | 0.132 s | 3.2 MiB |
+| `pu_rank` similarity, including tie keys and sort | 0.141 s | 21.8 MiB |
+| `pu_rank` popularity, same pool | 0.015 s | 20.3 MiB |
+| `pu_rank` random, same pool | 0.015 s | 20.9 MiB |
+
+A full candidate-by-training Float64 matrix would need 268.9 MiB per split; the
+streamed maximum never allocates one, and most of `pu_rank`'s allocation is the
+per-candidate SHA-256 tie and random keys shared by all three methods. At about
+0.14 s per split, all 20 splits cost a few seconds, so no batching tier, caching,
+or approximation is needed and none was added. These are one machine's numbers,
+not a target or a performance claim; record fresh timings alongside a real run.
 
 ## Tests
 
@@ -159,5 +211,14 @@ Tests cover hand-calculated hit/recall/enrichment cases, no hits, full recovery,
 exact random expectation, invalid denominators/budgets, golden hash keys and ties,
 training-only counts, evaluation-label independence, corrupted bundles including
 rewritten checksums, complete split validation before scoring, complete rankings,
-CLI behaviour, no-overwrite and deterministic reruns. GitHub CI also executes the
-Python fixture → Julia audit → split → PU evaluation workflow on Linux.
+CLI behaviour, no-overwrite and deterministic reruns.
+
+Similarity additionally has hand-calculated cosine values, exactly tied scores
+resolved by the shared tie policy, agreement to the last bit with Eka's existing
+`similarity` over a generated pool, evidence that the score is the maximum over
+training rather than the first or last reference, per-split training isolation
+(widening and narrowing the training set, and scoring a candidate alone), score
+invariance under changed evaluation labels, untouched global RNG state, repeated
+identical reruns, and an allocation bound proving no pairwise matrix is built.
+GitHub CI also executes the Python fixture → Julia audit → split → PU evaluation
+workflow on Linux.

@@ -43,7 +43,7 @@ end
     @test first(random).tie_key == "0a39da58b15a2942e1a9c07eed488f6c18fb9d46abdde88e5e080795b8574b6d"
     @test all(r -> r.score === nothing, random)
     @test all(r -> isempty(r.random_key), popularity)
-    for method in ("random", "popularity")
+    for method in ("random", "popularity", "similarity")
         first_run = pu_rank(training, candidates; method)
         @test pu_rank(reverse(training), reverse(candidates); method) == first_run
         @test pu_rank(["O6Ti2Ca2", "BaTiO3"], candidates; method) == first_run
@@ -73,6 +73,103 @@ end
     @test_throws ArgumentError pu_rank(training, [("MgTiO3", "positive")]; method="random")
     @test_throws ArgumentError pu_rank(training, candidates; method="random", ranking_seed=-1)
     @test_throws ArgumentError pu_rank(training, candidates; method="popularity", tie_seed=true)
+end
+
+# Deterministic distinct oxygen-containing ternaries for size/streaming checks.
+function pu_similarity_pool(count; offset=0)
+    others = [e for e in Eka.ELEMENT_SYMBOLS if e != "O"]
+    pairs = [(a, b) for a in others for b in others if a < b]
+    return [Composition("$(pairs[i+1][1])1$(pairs[i+1][2])2O3") for i in offset:(offset+count-1)]
+end
+
+@testset "PU maximum training similarity: hand-calculated scores and ties" begin
+    training = ["CaTiO3", "BaTiO3"]
+    candidates = ["MgTiO3", "SrTiO3", "CaZrO3", "MgAl2O4"]
+    ranked = pu_rank(training, candidates; method="similarity")
+    # Ti+O overlap: (1*1 + 3*3) / (sqrt(11) * sqrt(11)); MgAl2O4 shares only O:
+    # (4*3) / (sqrt(21) * sqrt(11)). Both training references give equal values here.
+    @test getproperty.(ranked, :score) == [10/11, 10/11, 10/11, 12/(sqrt(21)*sqrt(11))]
+    # Three exactly equal scores: order is the frozen score-independent tie policy,
+    # never the input order, the stored-score fallback, or a rounding tolerance.
+    @test formula.([r.composition for r in ranked]) == ["O3Sr1Ti1", "Mg1O3Ti1", "Ca1O3Zr1", "Al2Mg1O4"]
+    @test issorted(getproperty.(ranked[1:3], :tie_key))
+    @test allunique(getproperty.(ranked, :tie_key))
+    @test all(r -> isempty(r.random_key), ranked)
+    # The tie key is shared with popularity: one score-independent policy, not a
+    # per-method ordering, and it never depends on any stored model score.
+    @test Dict(r.composition => r.tie_key for r in ranked) ==
+        Dict(r.composition => r.tie_key for r in pu_rank(training, candidates; method="popularity"))
+
+    # The maximum over training, not the first, the last, or a mean.
+    mixed = pu_rank(["CaTiO3", "MgAl2O4"], ["Al2Zn1O4", "Ca1O3Zr1"]; method="similarity")
+    scores = Dict(formula(r.composition) => r.score for r in mixed)
+    @test scores["Al2O4Zn1"] == 20/21           # Al+O overlap with MgAl2O4.
+    @test scores["Ca1O3Zr1"] == 10/11           # Ca+O overlap with CaTiO3.
+    @test scores["Al2O4Zn1"] > similarity(Composition("Al2Zn1O4"), Composition("CaTiO3"))
+    @test scores["Ca1O3Zr1"] > similarity(Composition("Ca1O3Zr1"), Composition("MgAl2O4"))
+
+    # Exactly the pairwise cosine Eka already computes, maximised over training.
+    pool = pu_similarity_pool(60)
+    reference_training, reference_candidates = pool[1:25], pool[26:60]
+    reference = [maximum(similarity(c, t) for t in reference_training) for c in reference_candidates]
+    @test Eka.pu_max_similarity(reference_candidates, reference_training) == reference
+    @test getproperty.(pu_rank(reference_training, reference_candidates; method="similarity"), :score) ==
+        sort(reference; rev=true) # Descending score sequence; equal scores allowed.
+    @test all(0.0 .<= reference .<= 1.0) && all(isfinite, reference)
+    # Every candidate contains oxygen, so no in-scope pair can be fully disjoint.
+    @test minimum(reference) > 0.0
+    @test Eka.pu_cosine(Eka.pu_vector(Composition("CaTiO3")), Eka.pu_vector(Composition("CaTiO3"))) == 1.0
+end
+
+@testset "PU similarity: training isolation, label independence and streaming cost" begin
+    training = ["CaTiO3", "BaTiO3"]
+    candidates = ["MgTiO3", "SrTiO3", "CaZrO3", "MgAl2O4"]
+    baseline = pu_rank(training, candidates; method="similarity")
+    score_of(rows, f) = only(r.score for r in rows if r.composition == Composition(f))
+
+    # Adding a training composition may only raise a maximum, and removing it must
+    # restore the earlier value: references are refitted per call, never cached.
+    widened = pu_rank(vcat(training, ["Al2Mg1O3"]), candidates; method="similarity")
+    @test score_of(widened, "MgAl2O4") > score_of(baseline, "MgAl2O4")
+    @test all(score_of(widened, f) >= score_of(baseline, f) for f in candidates)
+    @test pu_rank(training, candidates; method="similarity") == baseline
+    narrowed = pu_rank(["BaTiO3"], candidates; method="similarity")
+    @test score_of(narrowed, "MgAl2O4") <= score_of(baseline, "MgAl2O4")
+    @test pu_rank(training, candidates; method="similarity") == baseline
+
+    # A candidate's score depends on the training set alone, not on the rest of
+    # the pool, so per-split pools cannot leak into one another.
+    for f in candidates
+        @test only(pu_rank(training, [f]; method="similarity")).score == score_of(baseline, f)
+    end
+
+    # Fixed training and candidates: evaluation labels cannot reach the scores.
+    order = [r.composition for r in baseline]
+    for heldout in ([first(order)], [last(order)], order[2:3])
+        @test only(pu_metrics(order, heldout; budgets=[4])).hits == length(heldout)
+        @test pu_rank(training, candidates; method="similarity") == baseline
+    end
+    @test only(pu_metrics(order, [first(order)]; budgets=[1])).hits == 1
+    @test only(pu_metrics(order, [last(order)]; budgets=[1])).hits == 0
+
+    # Global RNG state is untouched, and repeated calls are byte-identical.
+    Random.seed!(913); expected = rand(UInt64, 2); Random.seed!(913)
+    pu_rank(training, candidates; method="similarity")
+    @test rand(UInt64, 2) == expected
+    @test all(pu_rank(training, candidates; method="similarity") == baseline for _ in 1:3)
+    @test_throws ArgumentError pu_rank(training, ["MgO"]; method="similarity")
+    @test_throws ArgumentError pu_rank(training, vcat(candidates, ["Ba2Ti2O6"]); method="similarity")
+    @test_throws ArgumentError pu_rank(training, [("MgTiO3", "positive")]; method="similarity")
+
+    # Streaming, not a stored pairwise matrix: 300 x 600 pairs would need 1.4 MB
+    # of Float64 scores alone. The bound is deliberately loose but far below that.
+    stream_training, stream_candidates = pu_similarity_pool(300), pu_similarity_pool(600; offset=300)
+    @test isempty(intersect(Set(stream_training), Set(stream_candidates)))
+    Eka.pu_max_similarity(stream_candidates[1:2], stream_training[1:2])
+    used = @allocated Eka.pu_max_similarity(stream_candidates, stream_training)
+    @test used < 300_000
+    @test used < length(stream_training) * length(stream_candidates) * sizeof(Float64)
+    @test length(Eka.pu_max_similarity(stream_candidates, stream_training)) == length(stream_candidates)
 end
 
 function pu_test_bundle(dir)
@@ -106,10 +203,10 @@ end
         @test length(loaded.files) > 8
         first_run = benchmark_pu(bundle, snapshot, audit, joinpath(dir, "first"); synthetic=true)
         second = benchmark_pu(bundle, snapshot, audit, joinpath(dir, "second"); synthetic=true)
-        @test length(first_run.metrics) == 8
-        @test Set(m.method for m in first_run.metrics) == Set(["random", "popularity"])
+        @test length(first_run.metrics) == 12
+        @test Set(m.method for m in first_run.metrics) == Set(["random", "popularity", "similarity"])
         @test Set((m.split_seed,m.method,m.budget) for m in first_run.metrics) ==
-            Set((s,m,k) for s in 0:1 for m in ("random","popularity") for k in (1,4))
+            Set((s,m,k) for s in 0:1 for m in ("random","popularity","similarity") for k in (1,4))
         deterministic(tree) = Dict(k=>v for (k,v) in tree if k != "runtime.tsv")
         @test deterministic(recovery_tree(first_run.path)) == deterministic(recovery_tree(second.path))
         @test first_run.metrics == second.metrics
@@ -119,10 +216,10 @@ end
         for (name, hash) in first_run.config["deterministic_file_hashes"]
             @test bytes2hex(sha256(read(joinpath(first_run.path, split(name,'/')...)))) == hash
         end
-        @test length(first_run.config["deterministic_file_hashes"]) == 6
+        @test length(first_run.config["deterministic_file_hashes"]) == 8
         @test !haskey(first_run.config["deterministic_file_hashes"], "runtime.tsv")
         @test occursin("not scientific evidence", read(joinpath(first_run.path,"report.md"),String))
-        for split in loaded.result.splits, method in ("random","popularity")
+        for split in loaded.result.splits, method in ("random","popularity","similarity")
             path=joinpath(first_run.path,"split-$(lpad(split.seed,2,'0'))","$method.tsv")
             lines = Base.split(chomp(read(path,String)), '\n')
             @test length(lines)==5 # Complete pool, not just requested top k.
@@ -135,7 +232,7 @@ end
         @test deterministic(recovery_tree(first_run.path)) == deterministic(recovery_tree(second.path))
         args=["benchmark-pu","--splits",bundle,"--snapshot",snapshot,"--audit",audit,"--output",joinpath(dir,"cli"),"--synthetic"]
         code, stdout, _ = run_cli(args)
-        @test code==0 && occursin("8 metric rows",stdout)
+        @test code==0 && occursin("12 metric rows",stdout)
         @test deterministic(recovery_tree(joinpath(dir,"cli")))==deterministic(recovery_tree(first_run.path))
         @test run_cli(args)[1]==2
         @test run_cli(["benchmark-pu","--help"])[1]==0

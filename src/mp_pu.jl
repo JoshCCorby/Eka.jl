@@ -1,5 +1,5 @@
 # Separate PU evaluation. The binary benchmark contract is unchanged.
-const PU_METHODS = ("random", "popularity")
+const PU_METHODS = ("random", "popularity", "similarity")
 const PU_MEMBER_FILES = ("inputs/training.tsv", "inputs/candidates.tsv",
     "evaluation/heldout.tsv", "evaluation/labels.tsv")
 const PU_PRODUCER_FILES = ("src/mp_recovery.jl", "src/mp_audit.jl", "src/compositions.jl",
@@ -123,16 +123,63 @@ function pu_compositions(rows, label)
     return result
 end
 
+# Integer-coded element counts in the composition's own canonical term order.
+# The cosine arithmetic below is written to match `similarity`/`ranking_value`
+# term for term, so the streaming maximum is exactly the pairwise value Eka
+# already computes; only repeated symbol comparison and norm work is hoisted.
+struct PUVector
+    terms::Vector{Tuple{Int,Float64}}
+    norm::Float64
+end
+
+function pu_vector(c::Composition)
+    terms = [(findfirst(==(symbol), ELEMENT_SYMBOLS)::Int, Float64(count)) for (symbol, count) in c.terms]
+    return PUVector(terms, composition_norm(c))
+end
+
+function pu_cosine(candidate::PUVector, reference::PUVector)
+    product = 0.0
+    for (code, count) in candidate.terms, (other, amount) in reference.terms
+        code == other && (product += count * amount)
+    end
+    return clamp(product / (candidate.norm * reference.norm), 0.0, 1.0)
+end
+
+"""
+    pu_max_similarity(candidates, training)
+
+Maximum composition-vector cosine similarity between each candidate and any
+training composition, streamed one candidate at a time. Peak working memory is
+proportional to the number of compositions, never to the candidate-by-training
+product; no pairwise matrix is materialised. Held-out labels play no part: only
+the training vectors are consulted, and each call refits them from its argument.
+"""
+function pu_max_similarity(candidates, training)
+    references = map(pu_vector, training)
+    scores = Vector{Float64}(undef, length(candidates))
+    for (i, c) in enumerate(candidates)
+        candidate = pu_vector(c)
+        best = 0.0
+        for reference in references
+            value = pu_cosine(candidate, reference)
+            value > best && (best = value)
+        end
+        scores[i] = best
+    end
+    return scores
+end
+
 """
     pu_rank(training, candidates; method, ranking_seed=10000, tie_seed=20260901)
 
-Composition-only random or training-element-popularity ranking. There is no
-argument for labels, source IDs, stored scores, or bundle paths. All counts are
-refitted per call from unique training compositions. Returned scores are Float64
-for popularity; random uses its exact SHA-256 key and has no numeric score.
+Composition-only random, training-element-popularity, or maximum-training-
+similarity ranking. There is no argument for labels, source IDs, stored scores,
+or bundle paths. All counts and similarity references are refitted per call from
+unique training compositions. Returned scores are Float64 for popularity and
+similarity; random uses its exact SHA-256 key and has no numeric score.
 """
 function pu_rank(training, candidates; method::AbstractString, ranking_seed=10000, tie_seed=20260901)
-    method in PU_METHODS || throw(ArgumentError("PU methods are random and popularity"))
+    method in PU_METHODS || throw(ArgumentError("PU methods are random, popularity and similarity"))
     ranking_seed = only(recovery_integers([ranking_seed], "ranking seed"))
     tie_seed = only(recovery_integers([tie_seed], "tie seed"))
     training = pu_compositions(training, "training")
@@ -145,14 +192,19 @@ function pu_rank(training, candidates; method::AbstractString, ranking_seed=1000
             frequency[e] = get(frequency, e, 0) + 1
         end
     end
-    rows = map(candidates) do c
+    # Fitted anew here from this call's training compositions alone; no cache
+    # from an earlier split or from the complete positive set is consulted.
+    similarities = method == "similarity" ? pu_max_similarity(candidates, training) : Float64[]
+    rows = map(eachindex(candidates)) do i
+        c = candidates[i]
         tie = bytes2hex(sha256("eka-pu-tie-v1\n$tie_seed\n$(formula(c))"))
         if method == "random"
             return (composition=c, score=nothing,
                 random_key=bytes2hex(sha256("eka-pu-random-v1\n$ranking_seed\n$(formula(c))")), tie_key=tie)
         end
-        score = sum(get(frequency, e, 0) for e in species(c)) / (length(c) * length(training))
-        pu_check(isfinite(score), "non-finite PU popularity score")
+        score = method == "similarity" ? similarities[i] :
+            sum(get(frequency, e, 0) for e in species(c)) / (length(c) * length(training))
+        pu_check(isfinite(score), "non-finite PU $method score")
         return (composition=c, score=score, random_key="", tie_key=tie)
     end
     sort!(rows; by=r -> method == "random" ? (r.random_key, r.tie_key, formula(r.composition)) :
@@ -199,11 +251,12 @@ end
 """
     benchmark_pu(bundle, snapshot, audit, output; synthetic=false)
 
-Verify all saved splits before running random/popularity baselines on each split
-and every declared budget. Rankers receive only formula vectors and declared
-seeds. Evaluator-owned holdouts are consulted only after ranking. Save complete
-rankings, raw metrics, input/implementation provenance and runtime in a NEW output
-directory. This baseline-only milestone omits the Day 4 similarity comparator.
+Verify all saved splits before running the random, popularity and maximum
+training-similarity methods on each split and every declared budget. Rankers
+receive only formula vectors and declared seeds. Evaluator-owned holdouts are
+consulted only after ranking. Save complete rankings, raw metrics,
+input/implementation provenance and runtime in a NEW output directory. External
+scores are not a method here; see docs/mp-external-score-provenance.md.
 """
 function benchmark_pu(bundle::AbstractString, snapshot::AbstractString, audit::AbstractString,
         output::AbstractString; synthetic::Bool=false)
@@ -218,7 +271,7 @@ function benchmark_pu(bundle::AbstractString, snapshot::AbstractString, audit::A
     isfile(dependency_file) && (code["Manifest.toml"] = read(dependency_file))
     config = Dict{String,Any}(
         "schema_version" => 1, "evaluation_algorithm" => "eka-pu-evaluation-v1",
-        "stage" => "baseline-only; primary similarity comparison not yet implemented",
+        "stage" => "all declared primary methods implemented; paired analysis is a separate step",
         "is_synthetic" => synthetic, "protocol_id" => loaded.manifest["protocol_id"],
         "protocol_sha256" => MP_RECOVERY_PROTOCOL_SHA256, "methods" => collect(PU_METHODS),
         "budgets" => loaded.result.budgets, "split_seeds" => loaded.result.seeds,
@@ -267,10 +320,11 @@ function benchmark_pu(bundle::AbstractString, snapshot::AbstractString, audit::A
         pu_write_rows(joinpath(target, "metrics.tsv"), keys(first(metrics)), metrics)
         pu_write_rows(joinpath(target, "runtime.tsv"), keys(first(runtimes)), runtimes)
         open(joinpath(target, "report.md"), "w") do io
-            println(io, "# PU baseline evaluation\n")
+            println(io, "# PU recovery evaluation\n")
             println(io, synthetic ? "**Synthetic software fixture; not scientific evidence.**\n" :
-                "**Local MP recovery baseline run; data redistribution not cleared.**\n")
-            println(io, "Random and training-only popularity; similarity/primary paired comparison is not implemented yet.\n")
+                "**Local MP recovery run; data redistribution not cleared.**\n")
+            println(io, "Methods: random reference, training-element popularity, and maximum training-composition similarity.")
+            println(io, "The predefined primary comparison pairs similarity against popularity on identical splits; this file reports the raw per-split rows for it.\n")
             println(io, "Rankers received only training/candidate compositions and declared seeds; labels were attached after ranking.")
             println(io, "Observed-label fraction is not synthesis success rate. Unlabelled candidates are not confirmed failures.")
             println(io, "Repeated overlapping holdouts describe split sensitivity, not independent experiments or confidence intervals.")
@@ -296,7 +350,7 @@ end
 
 function benchmark_pu_main(args; out::IO)
     settings = ArgParseSettings(prog="eka benchmark-pu", add_help=false,
-        exc_handler=(_, error) -> throw(error), description="Verify split bundles and evaluate explicit PU random/popularity baselines.")
+        exc_handler=(_, error) -> throw(error), description="Verify split bundles and evaluate the declared PU random, popularity and similarity methods.")
     @add_arg_table! settings begin
         "--help", "-h"
             action = :store_true
@@ -324,6 +378,6 @@ function benchmark_pu_main(args; out::IO)
     end
     args = parse_args(args, settings)
     report = benchmark_pu(args["splits"], args["snapshot"], args["audit"], args["output"]; synthetic=args["synthetic"])
-    println(out, "PU baseline evaluation: ", length(report.metrics), " metric rows; report: ", report.path)
+    println(out, "PU recovery evaluation: ", length(report.metrics), " metric rows; report: ", report.path)
     return 0
 end
