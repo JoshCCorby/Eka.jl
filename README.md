@@ -4,11 +4,11 @@
 
 Created by **Joshua Corbett**.
 
-A reusable Julia library and command-line tool for exploring **precomputed chemical-composition scores** in SQLite. Filter by required elements, number of distinct elements, and minimum score; get validated, canonical compositions in deterministic order.
+A Julia library and command-line toolkit for **composition ranking and reproducible recovery benchmarks**. Explore precomputed scores in SQLite, import already-scored records, or audit Materials Project snapshots and evaluate positive–unlabelled (PU) recovery baselines on verified composition splits.
 
-This is a scientific software engineering project, not a new prediction model. It queries supplied scores, offers an explicit composition-similarity ranking, and imports already-scored records. It does not train or reimplement tensor factorization, or establish stability, synthesizability, or experimental validity.
+The SQLite workflow supports score and reference-composition similarity ranking. The separate PU workflow currently implements random and training-only element-popularity baselines. It does not train or reimplement tensor factorization, or establish stability, synthesizability, or experimental validity. **Real-data PU rankings have not yet been run; current end-to-end evaluation results are synthetic software checks.**
 
-## Quick start
+## Quick start: query stored scores
 
 Requires Julia 1.10 or newer. Run these commands from the repository root:
 
@@ -36,9 +36,9 @@ julia --project=. bin/eka -e Mg Zn -n 2 3 --threshold 0.3 -d /path/to/recommende
 julia --project=. bin/eka --help
 ```
 
-The upstream production database uses the supported `data2`, `data3`, `data4ionic`, and `data5ionic` layout. It contains 4,736,551 records. **Some rows use unsupported isotope notation such as `D`; strict queries that encounter those rows fail rather than silently changing or dropping them.** Use the audit command below to inspect coverage. An earlier Julia prototype provides the reference query semantics; the package separates those operations into reusable, tested components. See `docs/production-validation.md` for measured compatibility and limitations. No production database is downloaded, modified, or redistributed; it is explicitly ignored by Git. Verify data-source permissions before redistributing derivatives.
+The reference production database inspected for this project uses the supported `data2`, `data3`, `data4ionic`, and `data5ionic` layout. That snapshot contains 4,736,551 records. **Some rows use unsupported isotope notation such as `D`; strict queries that encounter those rows fail rather than silently changing or dropping them.** Use `eka validate --report` with a database path to inspect coverage. An earlier Julia prototype provides the reference query semantics; the package separates those operations into reusable, tested components. See `docs/production-validation.md` for measured compatibility and limitations. No production database is bundled, and SQLite queries do not download or modify one. Local production databases are ignored by Git. Verify data-source permissions before redistributing derivatives.
 
-## Fixed-budget ranking benchmarks
+## Binary labelled ranking benchmarks
 
 Compare supplied scores against random and training-element-popularity baselines
 on an explicit labelled candidate pool:
@@ -65,32 +65,54 @@ for exact input/metric definitions, limitations, and library/rerun examples.
 
 ## Materials Project recovery pilot
 
-The next research milestone is recovery of held-out compositions with experimental
-provenance. A separate MP exporter and `eka audit-mp` now prepare the **data audit**:
-snapshot hashes, canonical composition groups, positive/unlabelled/unresolved
-counts, and explicit exclusions. The initial scope is oxygen-containing ternaries;
-oxide chemistry is not yet validated. No real discovery result is implied.
+The pilot measures recovery of held-out compositions with experimental provenance
+from a pool of positives and unlabelled compositions. Its initial scope is
+oxygen-containing ternaries; oxide chemistry is not yet validated. Unlabelled
+compositions are **not confirmed negatives** and must not be supplied as failed
+outcomes to the separate binary benchmark above.
 
-See [the MP pilot guide](docs/mp-pilot.md) for secure API setup, export/audit commands,
-provenance rules, and remaining work. This is separate from the binary benchmark;
-unlabelled compositions must not be supplied as failed outcomes.
+| Milestone | Current state |
+| --- | --- |
+| Day 1: data and protocol | Local snapshot audited; scope and provenance rules frozen in the [recovery protocol](docs/mp-recovery-protocol.md) |
+| Day 2: composition splits | `eka split-mp` generates deterministic holdouts, verifies provenance, and separates ranker inputs from evaluation labels; [split guide](docs/mp-recovery-splits.md) |
+| Day 3: PU baseline evaluator | `eka benchmark-pu` verifies complete split bundles and evaluates random and training-only popularity; [evaluation guide](docs/mp-pu-evaluation.md) |
+| Day 4: similarity comparator | Next: maximum similarity to training compositions and external-score eligibility review |
+| Implementation freeze and real evaluation | Pending; no real-data PU rankings or recovery metrics have been run |
 
-The [one-week roadmap](docs/one-week-roadmap.md) sets out the next implementation,
-validation, and reporting milestones for 1–7 September 2026.
+To try the complete pipeline without an API key or private data, follow the
+[offline synthetic example](docs/mp-pu-evaluation.md#offline-end-to-end-example).
+It runs fixture generation → audit → split → baseline evaluation and produces
+full rankings, fixed-budget recovery metrics, hashes, and reproducibility reports.
+It requires Python 3.11+ and installed Julia dependencies. Output directories must
+be new; synthetic results are not scientific evidence.
 
-Day 1 choices are frozen in the [MP recovery protocol](docs/mp-recovery-protocol.md).
-The [data/provenance review](docs/mp-data-provenance-review.md) records the local-only
-data handling decision and unresolved redistribution questions.
+The [MP pilot guide](docs/mp-pilot.md) covers API setup and export/audit commands.
+Real snapshots and detailed derived reports remain local and ignored by Git;
+redistribution questions remain unresolved in the
+[data/provenance review](docs/mp-data-provenance-review.md). The
+[one-week roadmap](docs/one-week-roadmap.md) records the planned sequence. The frozen
+protocol is a historical pre-evaluation record: statements there about unavailable
+commands describe the freeze date, not the current CLI.
 
-Day 2 adds `eka split-mp`: deterministic composition-safe holdouts with verified
-snapshot/audit provenance, manifests, and separate ranker inputs and evaluation
-labels. See [split generation and the offline synthetic example](docs/mp-recovery-splits.md).
-Day 3 adds [verified PU baseline evaluation](docs/mp-pu-evaluation.md) through
-`eka benchmark-pu`, with random and training-only popularity methods. Synthetic
-end-to-end checks are available; no real-data PU rankings or recovery metrics have
-been run. The similarity comparator remains the next implementation milestone.
+## Commands
 
-## CLI contract
+Use `julia --project=. bin/eka` from the repository root, followed by:
+
+| Command | Purpose |
+| --- | --- |
+| `--database PATH [query options]` | Query and rank stored SQLite scores; no subcommand needed |
+| `import` | Build a new SQLite database from already-scored TSV records |
+| `validate` | Audit a SQLite database |
+| `benchmark` | Evaluate supplied scores and baselines against explicit binary outcomes |
+| `audit-mp` | Verify and group an exported MP snapshot |
+| `split-mp` | Generate deterministic composition-safe PU splits |
+| `benchmark-pu` | Verify split bundles and evaluate random/popularity PU baselines |
+
+Append `--help` to any subcommand for its own options; bare `--help` describes
+SQLite queries. The MP exporter is a separate Python script,
+`scripts/export_mp_pilot.py`, documented in the MP pilot guide.
+
+## SQLite query options
 
 | Option | Meaning | Default |
 | --- | --- | --- |
@@ -138,7 +160,7 @@ end
 - Printing includes explicit ones: `NaCl` becomes `Cl1Na1`; `Mg2Zn2` becomes `Mg1Zn1`.
 - Parentheses, isotopes, charges, whitespace, zero/negative/fractional amounts, and leading-zero counts are unsupported.
 
-Normalization intentionally loses the original formula order and overall scale. This represents **composition ratios**, not molecular identity or crystal structure. Two database rows that normalize to the same composition are retained as separate scored records; scores are not silently averaged or deduplicated.
+Normalization intentionally loses the original formula order and overall scale. This represents **composition ratios**, not molecular identity or crystal structure. SQLite queries retain two database rows that normalize to the same composition as separate scored records; scores are not silently averaged or deduplicated. The MP recovery workflow instead groups records by canonical composition before splitting, so equivalent formulas cannot cross the training/candidate boundary.
 
 ## Database contract
 
@@ -156,11 +178,17 @@ Legacy tables additionally have `ele1` through `eleN` and `int1` through `intN`;
 
 The file must already exist and have a SQLite header; SQLite must be able to read its schema and requested rows. Connections open with SQLite URI `mode=ro`, and statements/connections are closed even on errors. Ordinary queries are not full-file integrity audits. Missing files are never created by the query API.
 
-The numeric threshold and requested elements are SQL parameters. Table identifiers come only from inspected metadata and are quoted safely. Legacy queries select only the requested arity tables and match exact `eleN` values in SQL before parsing. Standard-table element/arity filtering happens in Julia. Parsed results are checked again and held in memory for sorting. The supplied source has no indexes; even filtered queries can require scans. We do not add indexes to user databases.
+The numeric threshold and requested elements are SQL parameters. Table identifiers come only from inspected metadata and are quoted safely. Legacy queries select only the requested arity tables and match exact `eleN` values in SQL before parsing. Standard-table element/arity filtering happens in Julia. Parsed results are checked again and held in memory for sorting. The inspected legacy source has no indexes; even filtered queries can require scans. We do not add indexes to user databases.
 
 Candidate formulas and scores are validated. NULL scores are explicitly rejected. Rows excluded by the SQL threshold are not a whole-dataset validation pass. Scores must be finite numbers, but are not constrained to `[0, 1]`: the source model determines their interpretation.
 
-## Pluggable ranking
+## Pluggable SQLite ranking
+
+These strategies rank stored-score records. Reference similarity here compares
+each candidate with one supplied formula; it is not the planned PU comparator
+that takes maximum similarity over the training set. PU baselines use separate
+`pu_rank` and `pu_metrics` interfaces. PU rankers take no stored scores; ties use
+the frozen hash policy rather than stored scores.
 
 ```julia
 rows = query_compositions("test/fixtures/tiny_test.db"; nary=[2])
@@ -223,9 +251,11 @@ julia --project=. bin/eka validate -d /path/to/data.sqlite --report
 
 ```bash
 julia --project=. -e 'using Pkg; Pkg.test()'
+# Python 3.11+; offline exporter tests need no MP client or API key.
+python3 -m unittest discover -s test -p 'test_mp_export.py' -v
 ```
 
-Tests cover normalization/hashing, seeded generative properties, exact filters, threshold boundaries, ordering invariance, both schemas, read-only enforcement, unsupported-isotope reports, custom ranking dispatch, import rollback/duplicates/provenance, and CLI output/exit behaviour. Synthetic legacy tables are built in temporary directories; routine tests never require the production database.
+Tests cover normalization/hashing, seeded generative properties, exact filters, threshold boundaries, ordering invariance, both schemas, read-only enforcement, unsupported-isotope reports, custom ranking dispatch, import rollback/duplicates/provenance, and CLI output/exit behaviour. They also cover MP provenance/grouping, deterministic composition splits, bundle tampering (including rewritten checksums), label-independent PU ranking, hand-calculated recovery metrics, and deterministic reruns. Synthetic fixtures are built in temporary directories; routine tests require neither production data nor API credentials.
 
 The fixture generator refuses to overwrite existing files. To create a separate copy:
 
@@ -233,9 +263,9 @@ The fixture generator refuses to overwrite existing files. To create a separate 
 julia --project=. test/fixtures/build_fixture.jl /path/to/new-fixture.db
 ```
 
-GitHub Actions is configured for Julia 1.10 and current stable on Linux, plus current stable on macOS and Windows. Local validation does not imply those remote jobs have run.
+[GitHub Actions](https://github.com/JoshCCorby/Eka.jl/actions/workflows/ci.yml) runs Julia 1.10 and current stable on Linux, current stable on macOS and Windows, and Python 3.11 exporter tests. The current-Julia Linux job also runs the offline Python fixture → Julia audit → split → PU evaluation example. Check the linked workflow for the status of a specific commit.
 
-## Performance
+## SQLite query performance
 
 ```bash
 # First query vs repeated calls in one Julia process; uses fixture by default.
@@ -254,13 +284,27 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 
 ## Layout and next steps
 
-`src/compositions.jl` owns formula invariants; `src/database.jl` owns schema adapters and audits; `src/ranking.jl` owns filtering and ranking dispatch; `src/import.jl` owns validated ingestion and provenance. `src/cli.jl` adapts those APIs to ArgParse and output streams. `bin/eka` is the only entry point that exits the process.
+| Module | Responsibility |
+| --- | --- |
+| `src/compositions.jl` | Canonical formulas, equality and hashing |
+| `src/database.jl`, `src/ranking.jl`, `src/import.jl` | SQLite adapters/audits, query ranking, and scored-record ingestion |
+| `src/benchmark.jl` | Binary labelled ranking benchmarks |
+| `scripts/export_mp_pilot.py`, `src/mp_audit.jl` | MP snapshot export, provenance audit, and composition grouping |
+| `src/mp_recovery.jl` | Deterministic PU splits and preserved provenance |
+| `src/mp_pu.jl` | Split verification, training-only baselines, recovery metrics, and reports |
+| `src/cli.jl`, `bin/eka` | Command parsing/output; only `bin/eka` exits the process |
 
-Next: establish the source conventions for isotope and nonstandard labels (`D`, `T`, `Bx`, `Cx`, etc.) before choosing an explicit representation policy, then add an adapter for an actual scored raw-source export. The supplied database is a scored artifact, not the raw training dataset. Model training and tensor factorization remain out of scope. See `docs/design.md` for research context and engineering trade-offs.
+Next is the Day 4 training-composition similarity comparator and a review of
+whether external scores can meet provenance and leakage requirements. The full
+comparison and implementation/dependency freeze precede real evaluation. Isotope
+representation and additional scored-source adapters remain separate backlog
+items; model training and tensor factorization remain out of scope. See the
+[original design notes](docs/design.md) for SQLite engineering context and the
+[roadmap](docs/one-week-roadmap.md) for the recovery pilot sequence.
 
 ## Author and research attribution
 
-Joshua Corbett is the sole author of this Julia package and its project documentation. His contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, Materials Project exporter and provenance audit, recovery benchmark protocol, tests, and performance analysis.
+Joshua Corbett is the sole author of this Julia package and its project documentation. His contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, Materials Project exporter and provenance audit, recovery benchmark protocol, deterministic composition splits, verified PU baseline evaluation, tests, and performance analysis.
 
 The original recommender research and precomputed database are separate work by Atsuto Seko and collaborators, available from [sekocha/recommender](https://github.com/sekocha/recommender). This package does not claim authorship of that model or dataset. For academic use of the database, cite:
 
