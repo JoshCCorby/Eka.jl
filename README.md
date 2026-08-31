@@ -6,7 +6,7 @@ Created by **Joshua Corbett**.
 
 A Julia library and command-line toolkit for **composition ranking and reproducible recovery benchmarks**. Explore precomputed scores in SQLite, import already-scored records, or audit Materials Project snapshots and evaluate positive–unlabelled (PU) recovery methods on verified composition splits.
 
-The SQLite workflow supports score and reference-composition similarity ranking. The separate PU workflow implements the three declared methods: random, training-only element popularity, and maximum similarity to the training compositions. It does not establish stability, synthesizability, or experimental validity. **The Materials Project pilot, label-sensitivity analyses and system-holdout comparison have been run and reproduced locally; data and detailed results remain outside Git pending final release review.**
+The SQLite workflow supports score and reference-composition similarity ranking. The original PU workflow implements random, training-only element popularity, and maximum similarity to training compositions. A separately versioned research workflow evaluates a fixed-compute element-pair factor model. It does not establish stability, synthesizability, or experimental validity. **The Materials Project pilot, label-sensitivity analyses, system-holdout comparison and element-pair evaluation have been run and reproduced locally; data and detailed results remain outside Git pending final release review.**
 
 ## Quick start: query stored scores
 
@@ -80,6 +80,7 @@ outcomes to the separate binary benchmark above.
 | Frozen pilot and reproduction | Complete locally: all 20 splits, three methods and four budgets; full clean-checkout reproduction passed; [evidence and restore guide](docs/mp-pilot-reproduction.md) |
 | Label sensitivity | Frozen evaluation-only and full-pipeline analyses completed and reproduced locally; [workflow and checks](docs/mp-label-sensitivity.md) |
 | System holdout | Frozen and reproduced across all three policies; 1,440 metrics; [workflow and checks](docs/mp-system-holdout.md) |
+| Learned comparator | Fixed-compute pair model evaluated across both designs and all policies; 480 new metrics and exact refit reproduction; [workflow](docs/mp-element-pair.md), [combined findings](docs/recovery-findings.md) |
 | Sharing review | [Permissions register](docs/publication-permissions.md) prepared; MIT applied; supplied MP terms support attributed results and covered data under CC BY 4.0; final release review pending |
 
 To try the complete pipeline without an API key or private data, follow the
@@ -304,14 +305,19 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 | `scripts/analyze_label_sensitivity.py` | Independent sensitivity validation, policy comparisons, and population reporting |
 | `src/mp_system_holdout.jl`, `scripts/run_system_holdout.jl` | Versioned whole-system splits, composition controls and population/similarity diagnostics |
 | `scripts/analyze_system_holdout.py` | Independent v2 membership, ranking, metric and diagnostic checks |
+| `src/element_pair_model.jl`, `src/mp_element_pair.jl` | Training-only pair-factor fitting and isolated learned-comparator evaluation |
+| `scripts/run_pair_feasibility.jl`, `scripts/run_element_pair.jl`, `scripts/analyze_element_pair.py` | Synthetic feasibility, frozen learned evaluation and independent validation |
 | `src/cli.jl`, `bin/eka` | Command parsing/output; only `bin/eka` exits the process |
 
-The frozen pilot, label-sensitivity analyses and system-holdout comparison are
-complete and reproduced locally. Next is the learned-comparator specification
-and feasibility decision, alongside final review of any proposed data release. External scores stay outside the primary comparison until a
+The benchmark series, including the fixed-compute learned comparator, is complete
+and reproduced locally. The [combined findings](docs/recovery-findings.md) retain
+all methods, label policies, numerical limits and both holdout designs. Further
+model development requires a new question and prospective design; review of any
+proposed data bundle remains separate. External scores stay outside the primary comparison until a
 new protocol version can establish training independence. Isotope
 representation and additional scored-source adapters remain separate backlog
-items; model training and tensor factorization remain out of scope. See the
+items. The separate research model is the specified element-pair factorization;
+full Seko/tensor reproduction and production model deployment remain out of scope. See the
 [original design notes](docs/design.md) for SQLite engineering context and the
 [revised roadmap](docs/recovery-roadmap.md) for the recovery project sequence.
 

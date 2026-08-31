@@ -16,4 +16,5 @@ include("fixtures/build_fixture.jl")
     include("test_mp_pu.jl")
     include("test_mp_label_sensitivity.jl")
     include("test_mp_system_holdout.jl")
+    include("test_element_pair_model.jl")
 end

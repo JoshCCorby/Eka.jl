@@ -141,3 +141,24 @@ Next is step 7: define the specific question, representation, missing-entry
 handling, unseen-system scoring and training-only model selection for any learned
 comparator, then assess feasibility. No learned model was trained or automatically
 approved because of the system-holdout result. A literature audit remains deferred.
+
+## Subsequent roadmap continuation
+
+After the work summarized above, the Windows protocol-line-ending CI issue was
+fixed in `433dfbb`; all five jobs passed. The roadmap then advanced through the
+learned-model feasibility, evaluation and packaging steps. A fixed-compute
+nonnegative element-pair model was specified and tested, then evaluated under a
+new frozen protocol across both designs and all three label policies.
+
+The learned run adds 480 metric rows and 120 fitted models. Mean model-minus-
+popularity Hits@100 is −0.20/−1.95/−1.15 for composition holdout and
++7.95/+1.35/+2.15 for system holdout (original/exclude-mixed/unlabel-mixed).
+101 fits reached the predefined iteration cap; no convergence optimum is claimed.
+All 992 deterministic files, the full configuration and six analysis files
+reproduced exactly in a separate checkout. Local tests passed 4,568 Julia checks
+and 32 Python tests. Earlier frozen evidence remains unchanged.
+
+See [combined findings](recovery-findings.md) and the
+[learned-model evidence guide](mp-element-pair.md). The earlier “next decision”
+section is historical; the planned series is now complete locally, with any
+further modeling requiring a separate question and design.

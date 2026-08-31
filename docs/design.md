@@ -8,7 +8,10 @@ This project explores the software engineering around composition recommendation
 2. **Reordering:** compare compositions to a chosen reference using a clearly defined, untrained cosine metric. Stored model scores remain intact and separately labelled.
 3. **Ingestion:** rebuild the software's query store from records that already carry scores. Normalization and validation cannot manufacture scientific predictions from an unscored materials dataset.
 
-Tucker/CP/NMF/SVD training is deliberately outside the project scope. The engineering focus is schema adaptation, multiple dispatch, scientific data validation, safe imports, and measured performance.
+The original SQLite scope excludes Tucker/CP/NMF/SVD training. A separately
+loaded [element-pair research comparator](mp-learned-feasibility.md) now permits
+the specified weighted symmetric nonnegative factor model and its frozen
+evaluation; this does not add model training to the SQLite CLI. The engineering focus is schema adaptation, multiple dispatch, scientific data validation, safe imports, and measured performance.
 
 ## Real-data lessons
 

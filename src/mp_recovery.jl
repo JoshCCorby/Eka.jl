@@ -6,6 +6,8 @@ const MP_RECOVERY_GROUP_HEADER = "composition\tchemical_system\tlabel\trecord_co
 const MP_RECOVERY_PROTOCOL_SHA256 = "f64c1fb803da3cc57aff658341b299824e3d662cc48039586a8bc10410bab21f"
 # Explicit versioned pins; retaining the v1 alias preserves its public identity.
 const MP_RECOVERY_PROTOCOLS = (
+    "eka-mp-element-pair-v1" => (file="mp-element-pair-protocol.md",
+        sha256="4482edc21c5efb4a65d4923ec985dcef526efd55106fbb521fe214487b563c01"),
     "eka-mp-system-holdout-v2" => (file="mp-system-holdout-protocol.md",
         sha256="2a9d056c65fe8fe31878f445857d539666b39f8310b1bf93453fc65da41cf263"),
     "eka-mp-recovery-v1" => (file="mp-recovery-protocol.md", sha256=MP_RECOVERY_PROTOCOL_SHA256),

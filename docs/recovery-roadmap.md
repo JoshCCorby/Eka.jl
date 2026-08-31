@@ -11,7 +11,7 @@ provisional; advance when each completion gate is met.
 
 ## Progress recorded 31 August 2026
 
-Steps 1, 2, 4, 5 and 6 are complete locally: the original pilot and both label-sensitivity
+The benchmark and evidence-packaging steps are complete locally: the original pilot and both label-sensitivity
 analyses validate and reproduce. Their distinct protocols were frozen before
 respective evaluation; v1's identity and artifacts remain unchanged. See
 [pilot reproduction](mp-pilot-reproduction.md) and
@@ -32,13 +32,22 @@ copy's checksum, current-version caveat and retained fields. Original code is
 MIT with scoped third-party notices. Final data-release review remains separate;
 there is no blanket provider-permission blocker for covered uses.
 
-The [system-holdout protocol](mp-system-holdout-protocol.md) was frozen before
-scoring, with all three policies and an explicit noncausal comparison. All 1,440
-metrics and 1,472 deterministic files reproduced exactly in a separate checkout;
-see the [workflow/evidence guide](mp-system-holdout.md). Next is Step 7: decide on
-a precise learned-comparator question/specification before any feasibility run.
-No model training is authorized by the result alone. A separate literature audit was
-considered and deferred; no ad hoc label correction was applied.
+The system-holdout comparison and a subsequent fixed-compute learned comparator
+are complete. Steps 7–9 now have a [feasibility decision](mp-learned-decision.md),
+[frozen learned protocol](mp-element-pair-protocol.md), complete evaluation and
+separate-checkout refit reproduction. The learned run contains 480 new metric rows
+and reproduced all 992 deterministic files, its full config and six analysis files.
+
+The [combined findings](recovery-findings.md) retain every method/design/policy,
+including unfavorable comparisons and the 101 capped fits. Code, synthetic tests,
+methods and the attributed aggregate summary form the sharing package; detailed
+records, rankings, factors and environments remain local. Final review of a future
+data bundle remains separate. No provider message or new API query was made.
+
+The ordered benchmark work is complete locally. Further model tuning, convergence
+studies or label audits require a new question and prospective design; they are not
+automatically authorized by a favorable branch. No literature-based label changes
+were made. See [execution and evidence](mp-element-pair.md) for restore instructions.
 
 ## 1. Finish the existing pilot without changing its design
 
@@ -150,39 +159,39 @@ Do this before committing to a new model. The original rule is “at least one M
 
 Phase 03 is optional. Make this decision from the remaining research question, available time, and the results of Steps 4–6.
 
-- [ ] Write the specific question a learned comparator would answer beyond the existing methods.
-- [ ] Specify one initial matrix/tensor representation, its axes, objective, and regularisation.
-- [ ] State how unobserved entries are handled without silently treating them as verified negatives.
-- [ ] Specify how the model scores every eligible candidate, including systems or entities without a fitted latent factor.
-- [ ] Define hyperparameter selection using training information only, with any internal validation separated from final evaluation labels.
-- [ ] Build a small end-to-end feasibility demonstration with synthetic or training-only data.
-- [ ] Confirm coverage, runtime, reproducibility, and that the chosen representation supports the intended holdout task.
-- [ ] Make a written go/no-go decision and update the effort estimate. Do not commit to the original 30-hour estimate before this gate.
+- [x] Write the specific question a learned comparator would answer beyond the existing methods.
+- [x] Specify one initial matrix/tensor representation, its axes, objective, and regularisation.
+- [x] State how unobserved entries are handled without silently treating them as verified negatives.
+- [x] Specify how the model scores every eligible candidate, including systems or entities without a fitted latent factor.
+- [x] Define hyperparameter selection using training information only, with any internal validation separated from final evaluation labels.
+- [x] Build a small end-to-end feasibility demonstration with synthetic or training-only data.
+- [x] Confirm coverage, runtime, reproducibility, and that the chosen representation supports the intended holdout task.
+- [x] Make a written go/no-go decision and update the effort estimate. Do not commit to the original 30-hour estimate before this gate.
 
 **Done when:** a viable model specification and demonstration justify the work, or a documented decision defers it.
 
 ## 8. If justified, fit and evaluate the learned comparator
 
-- [ ] Explicitly amend the documented scope that currently excludes Tucker/CP/NMF/SVD training.
-- [ ] Fit independently within each outer split, using only permitted training information.
-- [ ] Isolate preprocessing, feature fitting, model selection, and caches as well as model fitting.
-- [ ] Verify that changing evaluation labels cannot change the fitted model or its scores when permitted training inputs are fixed.
-- [ ] Test the predefined behavior for unseen systems/entities and record scoring coverage; do not silently drop unscorable candidates.
-- [ ] Freeze the learned-method configuration before final evaluation.
-- [ ] Compare against random, popularity, and similarity under both holdout designs, preserving the same eligible candidate populations within each comparison.
-- [ ] Include relevant label-sensitivity analysis where needed to support the conclusions.
-- [ ] Describe the method as an implementation in the same model family, not a reproduction of or direct comparison with Seko's published model.
+- [x] Explicitly amend the documented scope that currently excludes Tucker/CP/NMF/SVD training.
+- [x] Fit independently within each outer split, using only permitted training information.
+- [x] Isolate preprocessing, feature fitting, model selection, and caches as well as model fitting.
+- [x] Verify that changing evaluation labels cannot change the fitted model or its scores when permitted training inputs are fixed.
+- [x] Test the predefined behavior for unseen systems/entities and record scoring coverage; do not silently drop unscorable candidates.
+- [x] Freeze the learned-method configuration before final evaluation.
+- [x] Compare against random, popularity, and similarity under both holdout designs, preserving the same eligible candidate populations within each comparison.
+- [x] Include relevant label-sensitivity analysis where needed to support the conclusions.
+- [x] Describe the method as an implementation in the same model family, not a reproduction of or direct comparison with Seko's published model.
 
 **Done when:** the learned method runs reproducibly, passes isolation checks, and answers the stated additional question.
 
 ## 9. Package the evidence and reassess the next commitment
 
-- [ ] Assemble protocols, environment records, run identifiers, validation instructions, and results into a coherent report/package.
-- [ ] Separate frozen analyses, exploratory diagnostics, measured observations, and hypotheses.
-- [ ] State the limits of the provenance label, random composition holdout, and system holdout.
-- [ ] Include unfavourable, null, and contradictory results under the same reporting rules.
-- [ ] Release only artifacts cleared in Step 3; retain unresolved categories locally.
-- [ ] Replace provisional estimates with observed effort and runtime before planning further work.
+- [x] Assemble protocols, environment records, run identifiers, validation instructions, and results into a coherent report/package.
+- [x] Separate frozen analyses, exploratory diagnostics, measured observations, and hypotheses.
+- [x] State the limits of the provenance label, random composition holdout, and system holdout.
+- [x] Include unfavourable, null, and contradictory results under the same reporting rules.
+- [x] Release only artifacts cleared in Step 3; retain unresolved categories locally.
+- [x] Replace provisional estimates with observed effort and runtime before planning further work.
 
 **Done when:** a reader can understand and reproduce the permitted evidence without inferring synthesis success or unsupported discovery claims.
 
