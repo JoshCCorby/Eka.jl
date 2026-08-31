@@ -139,8 +139,9 @@ An explicit PU recovery mode is the next implementation step.
    dates from API creation/update timestamps.
 4. Fit popularity and any trainable comparator on each training subset only. No
    training positives or equivalent polymorph compositions may appear in its test
-   pool. Existing precomputed Seko scores remain exploratory until their training
-   provenance supports the split.
+   pool. Existing precomputed Seko scores are excluded from the primary
+   comparison; the [external score review](mp-external-score-provenance.md)
+   records the coverage evidence and the eligibility decision.
 5. Report observed-positive hits@k, held-out-positive recall@k, and observed-label
    enrichment with precise denominators. These do not estimate the true success
    rate of unlabelled chemistry. Compare methods on the same splits. Choose an

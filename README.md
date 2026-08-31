@@ -4,9 +4,9 @@
 
 Created by **Joshua Corbett**.
 
-A Julia library and command-line toolkit for **composition ranking and reproducible recovery benchmarks**. Explore precomputed scores in SQLite, import already-scored records, or audit Materials Project snapshots and evaluate positive–unlabelled (PU) recovery baselines on verified composition splits.
+A Julia library and command-line toolkit for **composition ranking and reproducible recovery benchmarks**. Explore precomputed scores in SQLite, import already-scored records, or audit Materials Project snapshots and evaluate positive–unlabelled (PU) recovery methods on verified composition splits.
 
-The SQLite workflow supports score and reference-composition similarity ranking. The separate PU workflow currently implements random and training-only element-popularity baselines. It does not train or reimplement tensor factorization, or establish stability, synthesizability, or experimental validity. **Real-data PU rankings have not yet been run; current end-to-end evaluation results are synthetic software checks.**
+The SQLite workflow supports score and reference-composition similarity ranking. The separate PU workflow implements the three declared methods: random, training-only element popularity, and maximum similarity to the training compositions. It does not train or reimplement tensor factorization, or establish stability, synthesizability, or experimental validity. **Real-data PU rankings have not yet been run; current end-to-end evaluation results are synthetic software checks.**
 
 ## Quick start: query stored scores
 
@@ -76,15 +76,17 @@ outcomes to the separate binary benchmark above.
 | Day 1: data and protocol | Local snapshot audited; scope and provenance rules frozen in the [recovery protocol](docs/mp-recovery-protocol.md) |
 | Day 2: composition splits | `eka split-mp` generates deterministic holdouts, verifies provenance, and separates ranker inputs from evaluation labels; [split guide](docs/mp-recovery-splits.md) |
 | Day 3: PU baseline evaluator | `eka benchmark-pu` verifies complete split bundles and evaluates random and training-only popularity; [evaluation guide](docs/mp-pu-evaluation.md) |
-| Day 4: similarity comparator | Next: maximum similarity to training compositions and external-score eligibility review |
+| Day 4: similarity comparator | Maximum training-composition similarity is implemented, streamed and benchmarked; external scores are excluded from the primary comparison by the [score provenance review](docs/mp-external-score-provenance.md) |
 | Implementation freeze and real evaluation | Pending; no real-data PU rankings or recovery metrics have been run |
 
 To try the complete pipeline without an API key or private data, follow the
 [offline synthetic example](docs/mp-pu-evaluation.md#offline-end-to-end-example).
-It runs fixture generation → audit → split → baseline evaluation and produces
+It runs fixture generation → audit → split → PU evaluation and produces
 full rankings, fixed-budget recovery metrics, hashes, and reproducibility reports.
 It requires Python 3.11+ and installed Julia dependencies. Output directories must
-be new; synthetic results are not scientific evidence.
+be new; synthetic results are not scientific evidence. To measure the similarity
+comparator at the size a real split implies, on generated formulas only, run
+`julia --startup-file=no --project=. scripts/benchmark_pu_similarity.jl`.
 
 The [MP pilot guide](docs/mp-pilot.md) covers API setup and export/audit commands.
 Real snapshots and detailed derived reports remain local and ignored by Git;
@@ -106,7 +108,7 @@ Use `julia --project=. bin/eka` from the repository root, followed by:
 | `benchmark` | Evaluate supplied scores and baselines against explicit binary outcomes |
 | `audit-mp` | Verify and group an exported MP snapshot |
 | `split-mp` | Generate deterministic composition-safe PU splits |
-| `benchmark-pu` | Verify split bundles and evaluate random/popularity PU baselines |
+| `benchmark-pu` | Verify split bundles and evaluate the random, popularity and similarity PU methods |
 
 Append `--help` to any subcommand for its own options; bare `--help` describes
 SQLite queries. The MP exporter is a separate Python script,
@@ -185,10 +187,11 @@ Candidate formulas and scores are validated. NULL scores are explicitly rejected
 ## Pluggable SQLite ranking
 
 These strategies rank stored-score records. Reference similarity here compares
-each candidate with one supplied formula; it is not the planned PU comparator
-that takes maximum similarity over the training set. PU baselines use separate
-`pu_rank` and `pu_metrics` interfaces. PU rankers take no stored scores; ties use
-the frozen hash policy rather than stored scores.
+each candidate with one supplied formula; it is not the PU comparator, which
+takes the maximum over the training set and shares only the pairwise cosine
+calculation. PU methods use separate `pu_rank` and `pu_metrics` interfaces. PU
+rankers take no stored scores; ties use the frozen hash policy rather than the
+stored-score fallback used here.
 
 ```julia
 rows = query_compositions("test/fixtures/tiny_test.db"; nary=[2])
@@ -255,7 +258,7 @@ julia --project=. -e 'using Pkg; Pkg.test()'
 python3 -m unittest discover -s test -p 'test_mp_export.py' -v
 ```
 
-Tests cover normalization/hashing, seeded generative properties, exact filters, threshold boundaries, ordering invariance, both schemas, read-only enforcement, unsupported-isotope reports, custom ranking dispatch, import rollback/duplicates/provenance, and CLI output/exit behaviour. They also cover MP provenance/grouping, deterministic composition splits, bundle tampering (including rewritten checksums), label-independent PU ranking, hand-calculated recovery metrics, and deterministic reruns. Synthetic fixtures are built in temporary directories; routine tests require neither production data nor API credentials.
+Tests cover normalization/hashing, seeded generative properties, exact filters, threshold boundaries, ordering invariance, both schemas, read-only enforcement, unsupported-isotope reports, custom ranking dispatch, import rollback/duplicates/provenance, and CLI output/exit behaviour. They also cover MP provenance/grouping, deterministic composition splits, bundle tampering (including rewritten checksums), label-independent PU ranking, hand-calculated recovery and similarity values, per-split training isolation, streaming allocation bounds, and deterministic reruns. Synthetic fixtures are built in temporary directories; routine tests require neither production data nor API credentials.
 
 The fixture generator refuses to overwrite existing files. To create a separate copy:
 
@@ -291,12 +294,12 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 | `src/benchmark.jl` | Binary labelled ranking benchmarks |
 | `scripts/export_mp_pilot.py`, `src/mp_audit.jl` | MP snapshot export, provenance audit, and composition grouping |
 | `src/mp_recovery.jl` | Deterministic PU splits and preserved provenance |
-| `src/mp_pu.jl` | Split verification, training-only baselines, recovery metrics, and reports |
+| `src/mp_pu.jl` | Split verification, training-only ranking methods, recovery metrics, and reports |
 | `src/cli.jl`, `bin/eka` | Command parsing/output; only `bin/eka` exits the process |
 
-Next is the Day 4 training-composition similarity comparator and a review of
-whether external scores can meet provenance and leakage requirements. The full
-comparison and implementation/dependency freeze precede real evaluation. Isotope
+Next is the implementation and dependency freeze, then the real experiment and
+its paired analysis. External scores stay outside the primary comparison until a
+new protocol version can establish training independence. Isotope
 representation and additional scored-source adapters remain separate backlog
 items; model training and tensor factorization remain out of scope. See the
 [original design notes](docs/design.md) for SQLite engineering context and the
@@ -304,7 +307,7 @@ items; model training and tensor factorization remain out of scope. See the
 
 ## Author and research attribution
 
-Joshua Corbett is the sole author of this Julia package and its project documentation. His contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, Materials Project exporter and provenance audit, recovery benchmark protocol, deterministic composition splits, verified PU baseline evaluation, tests, and performance analysis.
+Joshua Corbett is the sole author of this Julia package and its project documentation. His contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, Materials Project exporter and provenance audit, recovery benchmark protocol, deterministic composition splits, verified PU evaluation with its training-only comparators, external-score eligibility review, tests, and performance analysis.
 
 The original recommender research and precomputed database are separate work by Atsuto Seko and collaborators, available from [sekocha/recommender](https://github.com/sekocha/recommender). This package does not claim authorship of that model or dataset. For academic use of the database, cite:
 
