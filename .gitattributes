@@ -1,7 +1,6 @@
 # The frozen MP protocol and producer hashes refer to exact LF file bytes.
 # Preserve them even when a checkout has core.autocrlf enabled.
-/docs/mp-recovery-protocol.md text eol=lf
-/docs/mp-label-sensitivity-protocol.md text eol=lf
+/docs/mp-*-protocol.md text eol=lf
 /src/mp_audit.jl text eol=lf
 /src/compositions.jl text eol=lf
 /scripts/export_mp_pilot.py text eol=lf
