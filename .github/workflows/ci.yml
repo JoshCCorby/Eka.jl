@@ -5,6 +5,15 @@ on:
   pull_request:
 
 jobs:
+  mp-export:
+    name: Offline MP exporter tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s test -p 'test_mp_export.py' -v
   test:
     name: Julia ${{ matrix.julia-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

@@ -13,3 +13,11 @@ coverage/
 *.mem
 .DS_Store
 .Rhistory
+
+# Local research snapshots and secrets; publish data only after a licence review.
+data/local/
+reports/local/
+.venv-mp/
+.env
+.env.*
+__pycache__/

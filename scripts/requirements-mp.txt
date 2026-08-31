@@ -1,0 +1,3 @@
+# Optional live-export client; not required for Julia or offline exporter tests.
+# Query filters and selected fields checked locally with this release.
+mp-api==0.46.5
