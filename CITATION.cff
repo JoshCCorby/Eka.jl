@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use Eka in research, please cite this software and the data sources relevant to your analysis."
+title: "Eka.jl: composition ranking and reproducible recovery benchmarks"
+type: software
+authors:
+  - family-names: Corbett
+    given-names: Joshua
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/JoshCCorby/Eka.jl"
+url: "https://github.com/JoshCCorby/Eka.jl"
+abstract: >-
+  A Julia library and command-line toolkit for composition ranking,
+  provenance-aware Materials Project audits, and reproducible
+  positive-unlabelled recovery benchmarks.
+keywords:
+  - Julia
+  - materials informatics
+  - positive-unlabelled learning
+  - recommender systems

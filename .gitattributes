@@ -4,3 +4,9 @@
 /src/mp_audit.jl text eol=lf
 /src/compositions.jl text eol=lf
 /scripts/export_mp_pilot.py text eol=lf
+
+# Repository-maintenance helpers are not part of source distributions.
+/bot export-ignore
+/bot/** export-ignore
+/logs export-ignore
+/logs/** export-ignore

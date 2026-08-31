@@ -81,7 +81,7 @@ outcomes to the separate binary benchmark above.
 | Label sensitivity | Frozen evaluation-only and full-pipeline analyses completed and reproduced locally; [workflow and checks](docs/mp-label-sensitivity.md) |
 | System holdout | Frozen and reproduced across all three policies; 1,440 metrics; [workflow and checks](docs/mp-system-holdout.md) |
 | Learned comparator | Fixed-compute pair model evaluated across both designs and all policies; 480 new metrics and exact refit reproduction; [workflow](docs/mp-element-pair.md), [combined findings](docs/recovery-findings.md) |
-| Sharing review | [Permissions register](docs/publication-permissions.md) prepared; MIT applied; supplied MP terms support attributed results and covered data under CC BY 4.0; final release review pending |
+| Sharing review | Current MP terms checked; MIT and scoped notices applied; automated [source-release review](docs/release-readiness.md) passes locally. Record-level data bundles remain separate |
 
 To try the complete pipeline without an API key or private data, follow the
 [offline synthetic example](docs/mp-pu-evaluation.md#offline-end-to-end-example).

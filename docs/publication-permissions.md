@@ -1,8 +1,8 @@
 # Publication permissions register
 
 Reviewed **31 August 2026**. This is an evidence and release-handling register,
-not a legal opinion. **No release is approved by this review.** Pending clearance
-does not mean an artifact is legally prohibited from publication.
+not a legal opinion. The reviewed source-only archive is ready as a release
+candidate; this does not approve a separate MP record-level data bundle.
 
 ## Code decision and ownership limits
 
@@ -36,10 +36,11 @@ licenses downloaded Content under **CC BY 4.0**. The supplied text, checksum,
 source caveat and application to all six retained fields are recorded in the
 [terms evidence review](mp-terms-evidence.md).
 
-This supersedes the earlier missing-text blocker. A separate provider permission
-request is not required by that text for uses within its grant. The current
-page/version and any specific exceptions remain to be checked for a final data
-release; do not claim independent provider confirmation or apply MIT to MP data.
+This supersedes the earlier missing-text blocker. A read-only check of the live
+official page on 31 August 2026 confirmed the same material grant and requirements.
+A separate provider permission request is not required by that text for uses
+within its grant. Specific exceptions and the contents of any proposed data
+bundle remain to be checked; do not apply MIT to MP data.
 GNoME remains excluded, and external database identifiers do not license the
 underlying third-party records. Original source records/structures are not bundled.
 
@@ -50,11 +51,11 @@ underlying third-party records. Original source records/structures are not bundl
 | Eka original code and methodological documentation | Owner confirms authority; MIT applied in root LICENSE | Joshua Corbett; MIT copyright and permission notice | Third-party material retains its own terms; this is not data clearance | Original software licensed under MIT |
 | Dependencies | Installed source licence files inspected for the recorded versions; core Julia packages below have MIT notices | Preserve each package's copyright and licence notices when distributing covered code | Wrapper licences do not cover wrapped binaries; transitive/native/Python components require artifact-specific review if bundled | Conditional component evidence only; no blanket bundle clearance |
 | Test fixtures and examples | Original synthetic MP/benchmark fixtures; tiny SQLite fixture includes eight Seko README pairs and four original rows | MIT for original material; retained upstream BSD notice for reused pairs | Do not label reused pairs invented or infer full-database rights; see third-party notices | Software-example notices supplied; live source datasets remain separate |
-| Aggregate results and plots | Computed locally; supplied MP terms expressly allow processed results with attribution | MP citation, version/date, source, protocol, transformations and limitations | Apply attribution and transformation notices; review any specific exception and final contents | Preparation supported by supplied terms; final release review pending |
+| Aggregate results and plots | Computed locally; current official MP terms permit covered adaptations with attribution | MP citation, version/date, source, protocol, transformations and limitations | Apply attribution and transformation notices; review any specific exception and final contents | Attributed aggregate prose in the source archive reviewed; standalone result bundle remains separate |
 | Composition records | MP API composition/formula fields; source and transformation hashes retained | MP source/version/date, composition normalization and grouping changes | Supplied CC BY Content grant is the working basis; current-version applicability and specific exceptions remain a final review item | Preparation supported for covered content; records remain local |
 | Provenance fields | MP flags, IDs and source references retained and grouped | MP attribution; third-party attribution where established | General Content grant is evidence, not field-specific provider confirmation; do not infer underlying database rights | Review source-specific notices; no original ICSD/Pauling records distributed |
 | Other derived artifacts | Splits, candidate-level rankings, policy labels, audit tables and detailed diagnostics transform MP records | Source, protocol, hashes, representation and processing history | Retain CC BY attribution for covered content and identify transformations; review source-specific exceptions | Preparation supported for covered content; no automatic publication |
-| Environment and run records | Project/Manifest, source hashes and local reproduction instructions are captured | Package notices if actual sources/binaries are bundled | Review paths, source archives, logs, licences and data-bearing files separately; a lockfile is not a dependency licence | Can prepare sanitized records; final content review pending |
+| Environment and run records | Project/Manifest, source hashes and local reproduction instructions are captured | Package notices if actual sources/binaries are bundled | Review paths, source archives, logs, licences and data-bearing files separately; a lockfile is not a dependency licence | Source archive excludes local runs, environment lockfile, bot and logs; full environments remain local |
 
 ## Dependency evidence captured
 
@@ -72,16 +73,17 @@ not vendor those environments by accident.
 
 ## Open actions
 
-1. Use the supplied MP terms and CC BY 4.0 as the working basis for covered
-   content. Before a data release, check current-version applicability, specific
-   exceptions and required notices. The older blanket clarification request is
-   no longer a prerequisite; it remains unsent.
+1. Use the confirmed current MP terms and CC BY 4.0 as the working basis for
+   covered content. Before a record-level data release, check specific exceptions,
+   required notices and whether MP guidance is appropriate for the concrete
+   repackaging plan. The older blanket clarification request remains unsent.
 2. Preserve the applied MIT licence and scoped third-party notices in source
    distributions. The owner-confirmation and code-licence decision are complete;
    further incorporated material requires its own provenance review.
-3. Review actual proposed release contents and any bundled dependency/native
-   notices. Clear only supported categories; keep unresolved artifacts excluded.
+3. Re-run `python scripts/verify_release.py --archive <treeish>` on the exact
+   source release commit. Review any later proposed data or runtime bundle as a
+   distinct artifact; keep unresolved material excluded.
 
-The environment restore and original-code licensing decisions are complete.
-MP terms evidence is now recorded. Final artifact review and any specific
-data/source exceptions remain separate from MIT software licensing.
+The environment restore, original-code licensing, current MP terms check and
+source-candidate content review are complete. Any record-level data/runtime
+bundle and specific source exceptions remain separate from MIT software licensing.

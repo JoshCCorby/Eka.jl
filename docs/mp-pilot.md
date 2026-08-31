@@ -33,7 +33,7 @@ Requires Julia as usual and Python 3.11+ for the optional exporter/tests. Instal
 the MP client in an isolated environment; it is not a Julia package dependency:
 
 ```bash
-cd /Users/joshuacorbett/Coding/Eka
+cd /path/to/Eka
 python3 -m venv .venv-mp
 . .venv-mp/bin/activate
 python -m pip install -r scripts/requirements-mp.txt
