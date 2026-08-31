@@ -2,7 +2,7 @@
 
 Day 2 implements **membership only**, through `eka split-mp` and the Julia library.
 No scoring, recovery metrics, or model evaluation occurs. The existing binary
-`eka benchmark` stays unchanged; an explicit PU evaluator is still future work.
+`eka benchmark` stays unchanged; the [Day 3 PU evaluator](mp-pu-evaluation.md) now consumes these verified bundles.
 Joshua Corbett is the author of this implementation and documentation.
 
 The [frozen protocol](mp-recovery-protocol.md) specifies the scientific choices.

@@ -85,7 +85,10 @@ data handling decision and unresolved redistribution questions.
 Day 2 adds `eka split-mp`: deterministic composition-safe holdouts with verified
 snapshot/audit provenance, manifests, and separate ranker inputs and evaluation
 labels. See [split generation and the offline synthetic example](docs/mp-recovery-splits.md).
-No PU rankings or recovery metrics have been run.
+Day 3 adds [verified PU baseline evaluation](docs/mp-pu-evaluation.md) through
+`eka benchmark-pu`, with random and training-only popularity methods. Synthetic
+end-to-end checks are available; no real-data PU rankings or recovery metrics have
+been run. The similarity comparator remains the next implementation milestone.
 
 ## CLI contract
 

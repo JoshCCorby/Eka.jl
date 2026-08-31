@@ -2,7 +2,7 @@ function cli_settings()
     settings = ArgParseSettings(
         prog = "eka",
         description = "Explore precomputed chemical-composition scores in SQLite.",
-        epilog = "Additional commands: eka import --help; eka validate --help; eka benchmark --help; eka audit-mp --help; eka split-mp --help",
+        epilog = "Additional commands: eka import --help; eka validate --help; eka benchmark --help; eka audit-mp --help; eka split-mp --help; eka benchmark-pu --help",
         add_help = false,
         exit_after_help = false,
         exc_handler = (_, error) -> throw(error),
@@ -52,6 +52,7 @@ The library does not exit the calling process; only `bin/eka` calls `exit`.
 function main(args=ARGS; out::IO=stdout, err::IO=stderr)
     settings = cli_settings()
     try
+        !isempty(args) && first(args) == "benchmark-pu" && return benchmark_pu_main(args[2:end]; out)
         !isempty(args) && first(args) == "split-mp" && return mp_recovery_main(args[2:end]; out)
         !isempty(args) && first(args) == "audit-mp" && return mp_audit_main(args[2:end]; out)
         !isempty(args) && first(args) == "benchmark" && return benchmark_main(args[2:end]; out)
