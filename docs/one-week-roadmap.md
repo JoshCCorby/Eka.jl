@@ -159,17 +159,20 @@ Out of scope this week: a new machine-learning model, full Seko retraining, WBM/
 
 ## Completion checklist
 
-- [ ] Scope, labels, seeds, metrics, ties, and comparisons recorded before evaluation.
-- [ ] Snapshot and run provenance preserved; no credentials in artifacts.
-- [ ] Canonical composition groups remain intact across train/test boundaries.
-- [ ] Rankers consume only permitted training inputs and candidate features.
-- [ ] Unlabelled entries remain distinct from confirmed negatives.
-- [ ] All declared methods use identical pools within each comparison.
-- [ ] All declared splits and budgets reported, with no winner selection.
-- [ ] Deterministic rerun and synthetic end-to-end tests pass.
-- [ ] Report separates observed recovery, split variability, and unsupported discovery claims.
-- [ ] Distribution review completed, or unreviewed data/derivatives remain local.
-- [ ] Documentation and intended commits credit Joshua Corbett as the sole author.
+- [x] Scope, labels, seeds, metrics, ties, and comparisons recorded before evaluation.
+- [x] Snapshot and run provenance preserved; no credentials in artifacts.
+- [x] Canonical composition groups remain intact across train/test boundaries.
+- [x] Rankers consume only permitted training inputs and candidate features.
+- [x] Unlabelled entries remain distinct from confirmed negatives.
+- [x] All declared methods use identical pools within each comparison.
+- [x] All declared splits and budgets reported, with no winner selection.
+- [x] Deterministic rerun and synthetic end-to-end tests pass.
+- [x] Report separates observed recovery, split variability, and unsupported discovery claims.
+- [x] Distribution review completed, with unreviewed record-level derivatives retained locally.
+- [x] Documentation and intended commits credit Joshua Corbett as the sole author.
+
+Completed 31 August 2026. Later system-holdout and learned-comparator work used
+separate prospectively frozen protocols and did not amend this week-one plan.
 
 ## Evidence and reading for implementation
 

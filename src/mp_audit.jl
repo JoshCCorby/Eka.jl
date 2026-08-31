@@ -268,7 +268,7 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
             println(io, "The 20% holdout count is floor(positive compositions / 5), not a power calculation or an actual split.")
             println(io, "No discovery years are inferred. Source IDs and theoretical flags do not establish score-training independence.")
             println(io, "GNoME exclusion is recorded as an API query condition, not a licence certification. Review source terms before redistributing.\n")
-            println(io, "Next: freeze the chemistry definition and snapshot; review exclusions and source terms; implement explicit PU recovery splits/metrics.")
+            println(io, "Use this audit only with an explicitly versioned recovery protocol; the audit itself makes no ranking claim.")
             println(io, "Keep this audit with its original snapshot. The hashes establish file integrity, not upstream authenticity.")
         end
     catch

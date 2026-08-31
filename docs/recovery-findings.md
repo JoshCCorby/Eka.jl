@@ -68,7 +68,8 @@ The learned runner pins v2's config, verifies its inventory and source, and
 reconstructs all memberships before fitting. Alternative policies with identical
 training sets reproduce identical factor matrices and optimizer traces.
 
-Local validation passed 4,568 Julia checks and 32 Python tests. The independent
+Local validation passed 4,583 Julia checks and 36 Python tests after the
+[audit hardening compatibility check](audit-hardening-compatibility.md). The independent
 learned analyzer reconstructs membership, pair counts, metrics and coverage,
 recomputes every score and the final objective/gradient from factors, and rejects
 rehashed corruption. Complete refitting reproduction and inventories are recorded

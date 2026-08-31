@@ -127,7 +127,8 @@ authenticity or permission to redistribute the data.
 
 The grouped file is intentionally **not** input to `eka benchmark`: that existing
 command has a binary-outcome contract. There is no `outcome=0` for unlabelled here.
-An explicit PU recovery mode is the next implementation step.
+The separately versioned PU recovery commands consume the audited groups while
+preserving this distinction; see [PU evaluation](mp-pu-evaluation.md).
 
 ## Decisions after the real audit
 

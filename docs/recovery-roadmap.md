@@ -49,6 +49,11 @@ studies or label audits require a new question and prospective design; they are 
 automatically authorized by a favorable branch. No literature-based label changes
 were made. See [execution and evidence](mp-element-pair.md) for restore instructions.
 
+The subsequent [audit hardening compatibility check](audit-hardening-compatibility.md)
+found no normalization mismatch in the frozen snapshot. Reaudited composition and
+exclusion files and all 81 v1 membership files matched exactly, so the frozen
+scientific runs remain unchanged.
+
 ## 1. Finish the existing pilot without changing its design
 
 Preserve the frozen v1 protocol. Do not fold the later experiments into the first run.
