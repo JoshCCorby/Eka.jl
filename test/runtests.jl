@@ -10,4 +10,5 @@ include("fixtures/build_fixture.jl")
     include("test_legacy.jl")
     include("test_import.jl")
     include("test_cli.jl")
+    include("test_benchmark.jl")
 end

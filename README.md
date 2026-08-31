@@ -38,6 +38,31 @@ julia --project=. bin/eka --help
 
 The upstream production database uses the supported `data2`, `data3`, `data4ionic`, and `data5ionic` layout. It contains 4,736,551 records. **Some rows use unsupported isotope notation such as `D`; strict queries that encounter those rows fail rather than silently changing or dropping them.** Use the audit command below to inspect coverage. An earlier Julia prototype provides the reference query semantics; the package separates those operations into reusable, tested components. See `docs/production-validation.md` for measured compatibility and limitations. No production database is downloaded, modified, or redistributed; it is explicitly ignored by Git. Verify data-source permissions before redistributing derivatives.
 
+## Fixed-budget ranking benchmarks
+
+Compare supplied scores against random and training-element-popularity baselines
+on an explicit labelled candidate pool:
+
+```bash
+julia --project=. bin/eka benchmark \
+  --input examples/benchmark/candidates.tsv \
+  --training examples/benchmark/training.tsv \
+  --budget 2 5 10 --seeds 0 1 2 \
+  --source "Synthetic software example v1; arbitrary scores/outcomes and disjoint pools" \
+  --output /tmp/eka-benchmark-demo
+```
+
+The output path must be new. Reports include input snapshots and hashes, full
+rankings, Hits@k/precision, recall, enrichment, element-set novelty/diversity proxies,
+element coverage, and reproducibility settings. Canonical duplicates, training/pool
+overlap, missing labels, and oversized budgets fail explicitly.
+
+This evaluates supplied rankings; it does not train Seko's model or establish
+stability or synthesizability. The example labels are arbitrary software fixtures.
+Unobserved compounds are **not** negative outcomes, and upstream scores must be
+generated without evaluation leakage. See [the benchmark protocol](docs/benchmarking.md)
+for exact input/metric definitions, limitations, and library/rerun examples.
+
 ## CLI contract
 
 | Option | Meaning | Default |

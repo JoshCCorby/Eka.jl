@@ -12,3 +12,4 @@ coverage/
 *.cov
 *.mem
 .DS_Store
+.Rhistory
