@@ -82,6 +82,11 @@ Day 1 choices are frozen in the [MP recovery protocol](docs/mp-recovery-protocol
 The [data/provenance review](docs/mp-data-provenance-review.md) records the local-only
 data handling decision and unresolved redistribution questions.
 
+Day 2 adds `eka split-mp`: deterministic composition-safe holdouts with verified
+snapshot/audit provenance, manifests, and separate ranker inputs and evaluation
+labels. See [split generation and the offline synthetic example](docs/mp-recovery-splits.md).
+No PU rankings or recovery metrics have been run.
+
 ## CLI contract
 
 | Option | Meaning | Default |

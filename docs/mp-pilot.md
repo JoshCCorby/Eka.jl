@@ -3,8 +3,9 @@
 The pilot asks whether a ranking recovers held-out compositions with experimental
 provenance within a declared pool. It does not label unexplored compositions as
 failed experiments. This milestone prepares and audits a snapshot; it does **not**
-yet generate train/test splits, run PU recovery metrics, fit a model, or establish
-scientific performance.
+itself generate train/test splits, run PU recovery metrics, fit a model, or establish
+scientific performance. The separate [Day 2 split generator](mp-recovery-splits.md)
+now creates verified, composition-safe membership without ranking.
 
 ## Scope and decisions
 
