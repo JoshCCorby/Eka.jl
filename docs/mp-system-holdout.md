@@ -81,5 +81,7 @@ cross-platform or empty-depot claim is made.
 All 4,530 Julia checks and 26 Python checks passed before real scoring. The
 composition controls reproduce the earlier full-pipeline sensitivity results;
 the original sealed pilot and sensitivity inventories remain unchanged.
-No learned comparator has been trained. Step 7 remains a model-specification
-and feasibility decision, not an automatic response to the protocol comparison.
+At the completion of this system-holdout study, the learned comparator remained
+a specification/feasibility decision. The subsequent [element-pair evaluation](mp-element-pair.md)
+completed that gate and a separate frozen comparison; it does not alter this
+study or its original results.

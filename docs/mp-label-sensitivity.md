@@ -110,8 +110,9 @@ deterministic reruns, original controls, tampering with rewritten checksums,
 infeasible budgets and overwrite refusal. CI includes the synthetic workflows;
 remote CI status should be checked for the relevant commit.
 
-No learned comparator has been run. The subsequent [system-holdout study](mp-system-holdout.md)
-is separately frozen and reproduced; it does not change this sensitivity design. Interpretation and the
+The subsequent [system-holdout study](mp-system-holdout.md) and
+[element-pair comparator](mp-element-pair.md) are separately frozen and reproduced;
+neither changes this sensitivity design or its preserved results. Interpretation and the
 next policy-carry-forward decision are in the local report, separate from the
 frozen design. [Publication permissions](publication-permissions.md) remain open;
 the supplied [MP terms](mp-terms-evidence.md) now support preparation of attributed
