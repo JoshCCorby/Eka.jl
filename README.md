@@ -63,6 +63,25 @@ Unobserved compounds are **not** negative outcomes, and upstream scores must be
 generated without evaluation leakage. See [the benchmark protocol](docs/benchmarking.md)
 for exact input/metric definitions, limitations, and library/rerun examples.
 
+## Materials Project recovery pilot
+
+The next research milestone is recovery of held-out compositions with experimental
+provenance. A separate MP exporter and `eka audit-mp` now prepare the **data audit**:
+snapshot hashes, canonical composition groups, positive/unlabelled/unresolved
+counts, and explicit exclusions. The initial scope is oxygen-containing ternaries;
+oxide chemistry is not yet validated. No real discovery result is implied.
+
+See [the MP pilot guide](docs/mp-pilot.md) for secure API setup, export/audit commands,
+provenance rules, and remaining work. This is separate from the binary benchmark;
+unlabelled compositions must not be supplied as failed outcomes.
+
+The [one-week roadmap](docs/one-week-roadmap.md) sets out the next implementation,
+validation, and reporting milestones for 1–7 September 2026.
+
+Day 1 choices are frozen in the [MP recovery protocol](docs/mp-recovery-protocol.md).
+The [data/provenance review](docs/mp-data-provenance-review.md) records the local-only
+data handling decision and unresolved redistribution questions.
+
 ## CLI contract
 
 | Option | Meaning | Default |
@@ -233,7 +252,7 @@ Next: establish the source conventions for isotope and nonstandard labels (`D`, 
 
 ## Author and research attribution
 
-Joshua Corbett is the author of this Julia package. Its contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, tests, and performance analysis.
+Joshua Corbett is the sole author of this Julia package and its project documentation. His contributions include the package and CLI architecture, canonical composition model, schema adapters, ranking interface, validated imports, Materials Project exporter and provenance audit, recovery benchmark protocol, tests, and performance analysis.
 
 The original recommender research and precomputed database are separate work by Atsuto Seko and collaborators, available from [sekocha/recommender](https://github.com/sekocha/recommender). This package does not claim authorship of that model or dataset. For academic use of the database, cite:
 
