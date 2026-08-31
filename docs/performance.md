@@ -1,6 +1,6 @@
 # Local performance check
 
-Measured on 2026-08-30, using Julia 1.12.6 on the local macOS machine with SQLite.jl 1.8.2, DBInterface.jl 2.7.0, and ArgParse.jl 1.2.0. The input is the included **12-row synthetic fixture**, with elements `Al Si O`, arity 4, and threshold 0.01 (five results).
+Measured on 2026-08-30, using Julia 1.12.6 on the local macOS machine with SQLite.jl 1.8.2, DBInterface.jl 2.7.0, and ArgParse.jl 1.2.0. The input is the included **12-row test fixture** (eight upstream example pairs and four project-authored rows; see [notices](../THIRD_PARTY_NOTICES.md)), with elements `Al Si O`, arity 4, and threshold 0.01 (five results).
 
 These are exploratory measurements, not a statistically controlled benchmark. The first table records the initial fixture-based implementation. Production measurements after the schema-adapter work appear below.
 

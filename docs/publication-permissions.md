@@ -6,63 +6,54 @@ does not mean an artifact is legally prohibited from publication.
 
 ## Code decision and ownership limits
 
-Keep the current work local/private for now; do not add a licence or change
-repository visibility. No perpetual private-only decision or licence selection
-is made on the owner's behalf. Project metadata and README identify Joshua
-Corbett as author; repository history was inspected, but metadata cannot establish
-absence of employment, institutional, funder, contributor or third-party rights.
-No tracked LICENSE/COPYING file supplies an Eka reuse grant. Ownership confirmation
-and the owner's software-licence choice remain open before code release.
+Joshua Corbett selected **MIT** and confirmed that no applicable institutional
+IP exceptions or assignment obligations apply to this project on 31 August
+2026. On that owner declaration, the root [MIT licence](../LICENSE) is now
+applied to Eka's original code, documentation and original test material.
+This records the owner's confirmation, not an institutional clearance letter
+or an independent legal determination. No repository visibility change is
+requested. Source licensing does not clear third-party data rights.
 
-The Seko research/database is separately attributed in README. That attribution
-is not a right to distribute its data or to claim authorship of the original
-model. No external Seko data or trained model is included in the recovery release
-proposal; its score provenance remains excluded from the primary experiment.
+The optional Seko SQLite database and its research are separately attributed in
+README; the upstream Python script and full database are not bundled. Eight
+composition/score pairs in the tiny SQLite fixture match the upstream README,
+and some are repeated in examples, tests and precompilation. Earlier descriptions
+of all these rows as invented were incorrect. The upstream BSD 3-Clause notice
+is retained in [third-party notices](../THIRD_PARTY_NOTICES.md), with exact scope
+and source revision. Original Eka code remains MIT. This is not a blanket grant
+over the full database or the sources underlying it.
+
+The recovery pilot and label-sensitivity experiments use Materials Project API
+data, not Seko scores; the latter remain excluded from the primary experiment.
+Frozen local evidence retains its historical text and hashes; this register
+records the subsequent software-licensing decision.
 
 ## Materials Project terms evidence
 
-Applicable intended source: [MP Terms of Use](https://materialsproject.org/about/terms).
-The web reader could not retrieve the page. The official browser route redirected
-to `next-gen.materialsproject.org` and remained on security verification; no
-security challenge was bypassed and no terms were accepted. **Full terms text,
-effective version/date, and the terms applicable to the API export remain
-unverified.** Obtain an accessible official copy or provider clarification before
-making a field-level clearance claim.
+The owner supplied the MP Terms of Use on 31 August 2026. The text explicitly
+permits API analysis and presenting processed results with attribution, and
+licenses downloaded Content under **CC BY 4.0**. The supplied text, checksum,
+source caveat and application to all six retained fields are recorded in the
+[terms evidence review](mp-terms-evidence.md).
 
-The [MP-managed AWS registry](https://registry.opendata.aws/materials-project/)
-links MP terms and a provider contact. Official [AWS Open Data documentation](https://docs.materialsproject.org/downloading-data/aws-opendata)
-has search-indexed text stating that both API and Open Data access are subject to
-MP terms. This is evidence for which terms to review, not their substantive
-permission grant. Direct documentation retrieval also failed; the indexed text
-does not substitute for a current terms copy. This project's snapshot was
-retrieved through the API, not AWS.
-
-The official [FAQ](https://docs.materialsproject.org/frequently-asked-questions)
-supports citing MP and the database version. Preserve the canonical MP citation,
-database version, retrieval date, source route and processing changes; additional
-source/property-specific requirements must be checked against applicable terms.
-Previously reviewed [database release notes](https://docs.materialsproject.org/changes/database-versions)
-identify GNoME-specific restrictions. GNoME was excluded by the snapshot query;
-that exclusion does not establish uniform rights over every remaining field.
-
-The retained fields under review are exactly `material_id`, `composition`,
-`formula_pretty`, `theoretical`, `database_IDs`, and `deprecated`. Canonical
-compositions, chemical-system labels, grouped flags, membership and metrics are
-local transformations. No original third-party structures or bibliographic
-abstracts were requested by this exporter. MP-provided database identifiers must
-not be confused with a licence to obtain or distribute their underlying records.
+This supersedes the earlier missing-text blocker. A separate provider permission
+request is not required by that text for uses within its grant. The current
+page/version and any specific exceptions remain to be checked for a final data
+release; do not claim independent provider confirmation or apply MIT to MP data.
+GNoME remains excluded, and external database identifiers do not license the
+underlying third-party records. Original source records/structures are not bundled.
 
 ## Artifact-by-artifact status
 
 | Category | Basis established so far | Attribution / notices to preserve | Restrictions and unresolved questions | Current release status |
 | --- | --- | --- | --- | --- |
-| Eka code and methodological documentation | Local authorship metadata and source history; no repository licence grant | Joshua Corbett; relevant cited research | Confirm authority, obligations and any incorporated third-party code; select licence explicitly | Prepared locally; owner decision pending |
+| Eka original code and methodological documentation | Owner confirms authority; MIT applied in root LICENSE | Joshua Corbett; MIT copyright and permission notice | Third-party material retains its own terms; this is not data clearance | Original software licensed under MIT |
 | Dependencies | Installed source licence files inspected for the recorded versions; core Julia packages below have MIT notices | Preserve each package's copyright and licence notices when distributing covered code | Wrapper licences do not cover wrapped binaries; transitive/native/Python components require artifact-specific review if bundled | Conditional component evidence only; no blanket bundle clearance |
-| Synthetic fixtures and examples | Fixture builders explicitly create invented compositions/scores and synthetic source IDs; no live MP records required | Same authorship/licence decision as their source code; label synthetic outputs clearly | Confirm no copied third-party fixture data and apply the selected code/fixture terms | Separate code-only preparation possible; release decision pending |
-| Aggregate results and plots | Computed locally from the frozen MP snapshot; no applicable derivative-data grant yet established | MP citation, version/date, source, protocol, transformations and limitations | Do applicable MP/source terms permit these aggregates and figures? What licence or notices apply? | Not cleared; retained locally, not declared prohibited |
-| Composition records | MP API composition/formula fields; source and transformation hashes retained | MP source/version/date, composition normalization and grouping changes | Exact scope of MP grant for raw and canonical composition lists unknown | Not cleared; raw and grouped lists remain local |
-| Provenance fields | MP flags, IDs and source references retained and grouped | MP attribution; third-party attribution where established | Coverage of `theoretical`, `database_IDs`, material identifiers and source restrictions unknown; do not infer underlying database rights | Not cleared; no original ICSD/Pauling records distributed |
-| Other derived artifacts | Splits, candidate-level rankings, policy labels, audit tables and detailed diagnostics transform MP records | Source, protocol, hashes, representation and processing history | These may expose compositions/provenance; applicable derivative or database conditions unresolved | Not cleared; excluded from release |
+| Test fixtures and examples | Original synthetic MP/benchmark fixtures; tiny SQLite fixture includes eight Seko README pairs and four original rows | MIT for original material; retained upstream BSD notice for reused pairs | Do not label reused pairs invented or infer full-database rights; see third-party notices | Software-example notices supplied; live source datasets remain separate |
+| Aggregate results and plots | Computed locally; supplied MP terms expressly allow processed results with attribution | MP citation, version/date, source, protocol, transformations and limitations | Apply attribution and transformation notices; review any specific exception and final contents | Preparation supported by supplied terms; final release review pending |
+| Composition records | MP API composition/formula fields; source and transformation hashes retained | MP source/version/date, composition normalization and grouping changes | Supplied CC BY Content grant is the working basis; current-version applicability and specific exceptions remain a final review item | Preparation supported for covered content; records remain local |
+| Provenance fields | MP flags, IDs and source references retained and grouped | MP attribution; third-party attribution where established | General Content grant is evidence, not field-specific provider confirmation; do not infer underlying database rights | Review source-specific notices; no original ICSD/Pauling records distributed |
+| Other derived artifacts | Splits, candidate-level rankings, policy labels, audit tables and detailed diagnostics transform MP records | Source, protocol, hashes, representation and processing history | Retain CC BY attribution for covered content and identify transformations; review source-specific exceptions | Preparation supported for covered content; no automatic publication |
 | Environment and run records | Project/Manifest, source hashes and local reproduction instructions are captured | Package notices if actual sources/binaries are bundled | Review paths, source archives, logs, licences and data-bearing files separately; a lockfile is not a dependency licence | Can prepare sanitized records; final content review pending |
 
 ## Dependency evidence captured
@@ -81,15 +72,16 @@ not vendor those environments by accident.
 
 ## Open actions
 
-1. Obtain the applicable MP terms text and version, plus clarification of the
-   six retained fields and each proposed derivative class. A concrete unsent
-   request is prepared locally; no message has been sent to MP or other providers.
-2. Confirm code ownership/obligations and choose a software licence, or explicitly
-   elect to keep the project private. Until then, retain the temporary local-only
-   handling decision above.
+1. Use the supplied MP terms and CC BY 4.0 as the working basis for covered
+   content. Before a data release, check current-version applicability, specific
+   exceptions and required notices. The older blanket clarification request is
+   no longer a prerequisite; it remains unsent.
+2. Preserve the applied MIT licence and scoped third-party notices in source
+   distributions. The owner-confirmation and code-licence decision are complete;
+   further incorporated material requires its own provenance review.
 3. Review actual proposed release contents and any bundled dependency/native
    notices. Clear only supported categories; keep unresolved artifacts excluded.
 
-This register records every proposed category without granting publication
-permission. The environment restore work is complete; Step 3's legal/source and
-owner-decision gates remain open and do not silently become completed checkboxes.
+The environment restore and original-code licensing decisions are complete.
+MP terms evidence is now recorded. Final artifact review and any specific
+data/source exceptions remain separate from MIT software licensing.

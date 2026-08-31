@@ -4,11 +4,13 @@ Reviewed 31 August 2026 for the [recovery protocol](mp-recovery-protocol.md).
 **Decision: continue the local pilot; redistribution is not cleared.** This is a
 research handling record, not a legal opinion or blanket licence grant.
 
-Follow-up on 31 August 2026: the [publication-permissions register](publication-permissions.md)
-now records each proposed artifact category, dependency evidence and remaining
-owner/provider decisions. The official terms page remained on browser security
-verification. A clarification request is drafted locally but has not been sent;
-no field or derivative has been cleared by assuming a missing permission grant.
+Follow-up on 31 August 2026: the owner supplied the MP terms, including the
+CC BY 4.0 Content grant and permission for attributed processed results.
+The [terms evidence review](mp-terms-evidence.md) and
+[publication-permissions register](publication-permissions.md) supersede this
+initial review's missing-text status. Preparation is supported for covered
+content; final artifact review and specific exceptions remain separate. The
+initial access failures below are historical evidence, not an absent grant.
 
 ## Provenance interpretation
 
@@ -33,7 +35,7 @@ No label rule was changed and no ranking performance was inspected.
 
 | Area | Evidence / limitation | Handling decision |
 | --- | --- | --- |
-| Eka code | No repository LICENSE or COPYING file was found in the tracked files or top-level search. Dependency licences do not license Eka or its input data. | Do not invent or apply a software licence. Resolve an explicit code licence before describing a package as licensed for public reuse. |
+| Eka code | Following owner confirmation, MIT is applied to original code in [LICENSE](../LICENSE). Reused examples and dependencies retain [third-party notices](../THIRD_PARTY_NOTICES.md). | Software licensing is resolved separately; it grants no rights over input datasets or their derivatives. |
 | MP terms | The MP-managed AWS registry points to MP Terms of Use. Direct retrieval of the current terms page failed, including an HTTP 403 response through the web reader. | Record the gap. Do not mark all exported fields or derived outputs cleared. |
 | MP attribution | The MP-managed registry links the Jain et al. Materials Project paper. The official legacy API documentation lists the Ong et al. API paper, but is not current API terms. | Preserve MP source, database version, retrieval time, processing changes, and relevant citations. Verify current citation requirements before publication. |
 | GNoME | MP release notes explicitly identify a BY-NC licence and access acceptance for GNoME data. The snapshot query excludes GNoME. | Preserve the exclusion; it does not establish uniform rights for all remaining sources. |
@@ -64,9 +66,10 @@ structures or bibliographic abstracts were requested by this export.
 For now **none of the exported fields is cleared for redistribution by this
 review**. Preserve the frozen originals locally; keep record-level files, samples,
 coverage tables, splits, rankings, and derived results in ignored directories.
-Code, synthetic fixtures, and methodological documentation can be prepared
-separately, subject to the code-licence decision and a final sharing review.
-Nothing has been published or sent to source providers.
+Original code, synthetic fixtures, and methodological documentation are covered
+by MIT; reused Seko example pairs retain their upstream notice. Source code has
+been committed and pushed separately. No MP dataset or data-derived release has
+been cleared, and no clarification request has been sent to source providers.
 
 Before sharing data or a data-derived summary:
 
@@ -76,7 +79,7 @@ Before sharing data or a data-derived summary:
    distinguishing MP-provided metadata from original third-party records.
 3. Record approved attribution, licence links, source version/date, and a statement
    of canonicalization, grouping, splitting, and other modifications.
-4. Resolve Eka's code licence separately; review intended files for credentials,
+4. Preserve Eka's MIT licence and third-party notices; review intended files for credentials,
    raw data, local environments, and unreviewed derivatives.
 
 Until then, the release fallback is a prepared code/synthetic-input package with

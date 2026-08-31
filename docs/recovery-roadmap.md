@@ -11,7 +11,7 @@ provisional; advance when each completion gate is met.
 
 ## Progress recorded 31 August 2026
 
-Steps 1, 2 and 4 are complete locally: the original pilot and both label-sensitivity
+Steps 1, 2, 4, 5 and 6 are complete locally: the original pilot and both label-sensitivity
 analyses validate and reproduce. Their distinct protocols were frozen before
 respective evaluation; v1's identity and artifacts remain unchanged. See
 [pilot reproduction](mp-pilot-reproduction.md) and
@@ -22,19 +22,22 @@ The local evidence directories are
 `reports/local/mp-label-sensitivity-v1-2026-08-31/`. Scientific results, rankings,
 source records and unreviewed derivatives remain outside Git. The sensitivity
 report records the subsequent decision to carry all three label policies into
-the proposed system-holdout design; no v2 rankings have been inspected.
+the proposed system-holdout design; v2 was subsequently frozen, implemented and evaluated separately.
 
 Step 3 has a verified environment restore and an
 [artifact-by-artifact permissions register](publication-permissions.md).
-The official MP terms remain inaccessible through the available routes; a
-provider clarification request is prepared but unsent. Code ownership/licence
-and applicable data/derivative permissions remain open. No licence was selected,
-visibility changed, or artifact published. Unresolved categories stay local.
+The owner supplied MP terms permitting attributed processed results and licensing
+Content under CC BY 4.0; the [evidence review](mp-terms-evidence.md) records the
+copy's checksum, current-version caveat and retained fields. Original code is
+MIT with scoped third-party notices. Final data-release review remains separate;
+there is no blanket provider-permission blocker for covered uses.
 
-Next is Step 5: define and freeze chemical-system holdout and comparisons across
-the retained label policies. Similarity's advantage may shrink, persist or reverse;
-element-system separation does not guarantee chemical distance. Learned models
-remain optional after evaluation design. A separate literature audit was
+The [system-holdout protocol](mp-system-holdout-protocol.md) was frozen before
+scoring, with all three policies and an explicit noncausal comparison. All 1,440
+metrics and 1,472 deterministic files reproduced exactly in a separate checkout;
+see the [workflow/evidence guide](mp-system-holdout.md). Next is Step 7: decide on
+a precise learned-comparator question/specification before any feasibility run.
+No model training is authorized by the result alone. A separate literature audit was
 considered and deferred; no ad hoc label correction was applied.
 
 ## 1. Finish the existing pilot without changing its design
@@ -75,9 +78,9 @@ Run this work alongside Step 4 where possible. Unresolved publication terms need
 
 - [x] Choose and document how exact environments are restored: commit the appropriate environment lockfile or deliberately preserve a complete environment with each run.
 - [x] Verify the chosen approach from a clean checkout and document the restore command/workflow.
-- [ ] Check ownership and third-party licensing constraints before selecting a licence for your own code, or record a decision to remain private.
-- [ ] Retrieve the applicable Materials Project terms through an accessible official route; request clarification from MP if necessary.
-- [ ] Record the terms' source, review date, applicable version where available, and exact data fields covered.
+- [x] Record owner confirmation and apply MIT to original code, with scoped notices for reused Seko examples and dependencies; third-party data permissions remain separate.
+- [x] Record owner-supplied MP terms and their provenance limits; independently retrieved current-page applicability remains a final data-release check.
+- [x] Record the supplied text's checksum, intended source, review date, unavailable version date, six retained fields and general-grant scope limits.
 - [x] Create a publication-permissions table covering your code, dependencies, synthetic fixtures, aggregate results, composition records, provenance fields, and other derived artifacts.
 - [x] For each category, record the basis for sharing, attribution requirements, restrictions, and unresolved questions.
 - [x] Do not mark any category as definitely publishable or prohibited without establishing the applicable basis.
@@ -116,30 +119,30 @@ Do this before committing to a new model. The original rule is “at least one M
 
 ## 5. Design and freeze chemical-system holdout v2
 
-- [ ] Specify a chemical system as a canonical unordered set of elements and document how it is constructed from a composition.
-- [ ] Define exactly how whole systems are assigned to training and candidate populations, including unlabelled records, eligibility rules, and edge cases.
-- [ ] Document how seeded system selection works and how it handles unequal system sizes.
-- [ ] Define the question narrowly: how does recovery change when candidate element combinations have no training positives?
-- [ ] Predefine how v1 and v2 will be compared on the same snapshot and with clearly specified label policies.
-- [ ] Require reporting of training-positive count, candidate count, held-out-positive count/prevalence, number of systems, and concentration of positives in large systems.
-- [ ] Include the random baseline and within-protocol method differences; do not interpret raw hits@100 changes alone as the effect of chemical separation.
-- [ ] Add a candidate-to-training similarity diagnostic under both protocols, using a documented representation and distance/similarity rule.
-- [ ] If making a causal claim about chemical separation, predefine a matched-size control to reduce confounding by training and pool sizes. Otherwise limit the conclusion to the observed protocol difference.
-- [ ] Freeze the v2 protocol, metrics, diagnostics, and any controls before looking at v2 rankings.
+- [x] Specify a chemical system as a canonical unordered set of elements and document how it is constructed from a composition.
+- [x] Define exactly how whole systems are assigned to training and candidate populations, including unlabelled records, eligibility rules, and edge cases.
+- [x] Document how seeded system selection works and how it handles unequal system sizes.
+- [x] Define the question narrowly: how does recovery change when candidate element combinations have no training positives?
+- [x] Predefine how v1 and v2 will be compared on the same snapshot and with clearly specified label policies.
+- [x] Require reporting of training-positive count, candidate count, held-out-positive count/prevalence, number of systems, and concentration of positives in large systems.
+- [x] Include the random baseline and within-protocol method differences; do not interpret raw hits@100 changes alone as the effect of chemical separation.
+- [x] Add a candidate-to-training similarity diagnostic under both protocols, using a documented representation and distance/similarity rule.
+- [x] If making a causal claim about chemical separation, predefine a matched-size control to reduce confounding by training and pool sizes. Otherwise limit the conclusion to the observed protocol difference.
+- [x] Freeze the v2 protocol, metrics, diagnostics, and any controls before looking at v2 rankings.
 
 **Done when:** v2 defines a reproducible experiment with explicit limits, comparison rules, and no assumed direction of the result.
 
 ## 6. Implement, validate, and run v2
 
-- [ ] Implement the versioned system-grouped split algorithm without altering v1 behavior.
-- [ ] Add meaningful checks for system separation, composition disjointness, deterministic membership, and isolation from evaluation labels.
-- [ ] Split `src/mp_pu.jl` only if the new implementation needs clearer boundaries between verification, ranking, metrics, and reporting; file length alone is not a requirement to refactor.
-- [ ] Run random, popularity, and similarity under v2 on the frozen snapshot.
-- [ ] Run the predefined diagnostics and any matched-size controls.
-- [ ] Reproduce the required outputs from the captured environment.
-- [ ] Report v1 and v2 side by side, including population differences and similarity distributions.
-- [ ] Explain whether the advantage shrinks, persists, or reverses, without assuming any change proves the removal of chemical analogues.
-- [ ] If label sensitivity was material, carry the relevant alternative policies into v2 or explicitly restrict the scope of the conclusion.
+- [x] Implement the versioned system-grouped split algorithm without altering v1 behavior.
+- [x] Add meaningful checks for system separation, composition disjointness, deterministic membership, and isolation from evaluation labels.
+- [x] Split `src/mp_pu.jl` only if the new implementation needs clearer boundaries between verification, ranking, metrics, and reporting; file length alone is not a requirement to refactor.
+- [x] Run random, popularity, and similarity under v2 on the frozen snapshot.
+- [x] Run the predefined diagnostics and any matched-size controls.
+- [x] Reproduce the required outputs from the captured environment.
+- [x] Report v1 and v2 side by side, including population differences and similarity distributions.
+- [x] Explain whether the advantage shrinks, persists, or reverses, without assuming any change proves the removal of chemical analogues.
+- [x] If label sensitivity was material, carry the relevant alternative policies into v2 or explicitly restrict the scope of the conclusion.
 
 **Done when:** the protocol difference is quantified, reproducible, and interpreted with its population and representation differences visible.
 

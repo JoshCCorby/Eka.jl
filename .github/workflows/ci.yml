@@ -50,3 +50,4 @@ jobs:
           python scripts/analyze_pu_pilot.py "$RUNNER_TEMP/pu-results" "$RUNNER_TEMP/pu-analysis"
           python -m unittest discover -s test -p 'test_pu_analysis.py' -v
           python -m unittest discover -s test -p 'test_label_sensitivity_analysis.py' -v
+          python -m unittest discover -s test -p 'test_system_holdout_analysis.py' -v

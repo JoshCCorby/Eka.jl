@@ -108,10 +108,12 @@ also passed the full Julia suite and sensitivity-analysis tests. Tests include
 hand-calculated filtering/depth metrics, policy membership, training isolation,
 deterministic reruns, original controls, tampering with rewritten checksums,
 infeasible budgets and overwrite refusal. CI includes the synthetic workflows;
-remote CI execution has not been claimed for these uncommitted changes.
+remote CI status should be checked for the relevant commit.
 
-No learned comparator or system holdout has been run. Interpretation and the
+No learned comparator has been run. The subsequent [system-holdout study](mp-system-holdout.md)
+is separately frozen and reproduced; it does not change this sensitivity design. Interpretation and the
 next policy-carry-forward decision are in the local report, separate from the
 frozen design. [Publication permissions](publication-permissions.md) remain open;
-the provider clarification request is drafted but unsent, and no licence was
-selected or release performed.
+the supplied [MP terms](mp-terms-evidence.md) now support preparation of attributed
+results and covered data. MIT applies separately to original code; final release
+review remains distinct.
