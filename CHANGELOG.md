@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `docs/api-stability.md`: the 0.1.x public API contract. Exported names are
+  classified stable, stable-command-line, or experimental; database-schema and
+  generated-report-format guarantees are stated, including that `schema_version`
+  is written as an integer by most producers but as a string by
+  `import_compositions`, a wart deferred to 0.2.0 rather than corrected now.
+- `test/test_api.jl` makes that contract executable: adding an exported name
+  without classifying it fails the suite.
+- Docstrings for `ranking_value`, `rank_by_score` and `rank_by_similarity`, the
+  last three exported names without them. All 27 exports are now documented.
+- The provenance-path guard now covers the `mp_system_holdout` and
+  `mp_label_sensitivity` code lists, which hold three of the five `docs/` paths
+  used as manifest keys and were previously unguarded.
+
 ### Changed
 
 - Research modules (`mp_label_sensitivity.jl`, `mp_system_holdout.jl`,

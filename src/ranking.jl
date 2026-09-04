@@ -50,6 +50,15 @@ struct SimilarityRanking <: AbstractRankingMethod
 end
 SimilarityRanking(reference::AbstractString) = SimilarityRanking(Composition(reference))
 
+"""
+    ranking_value(method::AbstractRankingMethod, composition::Composition, stored_score::Real)
+
+Return the value used to order `composition` under `method`; larger values rank
+first. Implement this to add a ranking strategy. The result must be finite, or
+`rank_compositions` throws. `stored_score` is the score held in the database,
+passed through unchanged, so a method may ignore it. Ties are broken by
+descending stored score and then canonical formula.
+"""
 ranking_value(::ScoreRanking, ::Composition, stored_score::Real) = Float64(stored_score)
 
 function ranking_value(method::SimilarityRanking, composition::Composition, ::Real)
@@ -86,5 +95,19 @@ function rank_compositions(results, method::AbstractRankingMethod=ScoreRanking()
     return rank!(rows, method)
 end
 
+"""
+    rank_by_score(results)
+
+Rank `(Composition, stored_score)` rows by stored score, descending. Shorthand
+for `rank_compositions(results, ScoreRanking())`. The input is not mutated.
+"""
 rank_by_score(results) = rank_compositions(results, ScoreRanking())
+"""
+    rank_by_similarity(results, reference)
+
+Rank `(Composition, stored_score)` rows by cosine similarity of element-count
+vectors to `reference`, given as a `Composition` or a formula string. Shorthand
+for `rank_compositions(results, SimilarityRanking(reference))`. Similarity
+measures stoichiometric overlap, not chemical plausibility.
+"""
 rank_by_similarity(results, reference) = rank_compositions(results, SimilarityRanking(reference))

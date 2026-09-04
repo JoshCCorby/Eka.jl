@@ -177,7 +177,7 @@ The `data4ionic` and `data5ionic` tables cover ionic records only. Queries do no
 
 ## Pluggable ranking
 
-SQLite strategies rank stored-score rows. PU methods use the separate `pu_rank` and `pu_metrics` interfaces.
+SQLite strategies rank stored-score rows. PU methods use the separate `pu_rank` and `pu_metrics` interfaces, which are experimental; see [API stability](docs/api-stability.md).
 
 ```julia
 using EkaCompositions
@@ -189,6 +189,13 @@ ranked = rank_compositions(rows, PreferBinary())
 ```
 
 Ranking values must be finite. Ties use descending stored score and then canonical formula.
+
+## API stability
+
+Exported names are classified as stable, stable-CLI, or experimental for the
+0.1.x series, alongside the database-schema and report-format guarantees, in
+[API stability](docs/api-stability.md). The classification is enforced by
+`test/test_api.jl`.
 
 ## Development
 

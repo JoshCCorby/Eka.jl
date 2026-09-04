@@ -15,6 +15,15 @@ const MEP = MPElementPair
             "scripts/analyze_pu_pilot.py", "docs/mp-element-pair-protocol.md",
             "docs/mp-learned-feasibility.md", "Project.toml"],
         "pu_producer" => collect(EkaCompositions.PU_PRODUCER_FILES),
+        # The mp_system_holdout list holds three of the five docs paths that are
+        # manifest keys, and was previously unguarded.
+        "mp_system_holdout" => ["src/mp_pu.jl", "src/mp_label_sensitivity.jl",
+            "src/mp_system_holdout.jl", "scripts/run_system_holdout.jl",
+            "scripts/analyze_system_holdout.py", "scripts/analyze_pu_pilot.py",
+            "docs/mp-recovery-protocol.md", "docs/mp-label-sensitivity-protocol.md",
+            "docs/mp-system-holdout-protocol.md"],
+        "mp_label_sensitivity" => ["src/mp_pu.jl", "src/mp_label_sensitivity.jl",
+            "scripts/run_label_sensitivity.jl"],
     )
     for (label, names) in lists, name in names
         @test isfile(joinpath(root, name)) || "$label: missing $name" == ""
