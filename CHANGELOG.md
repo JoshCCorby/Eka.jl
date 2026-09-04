@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tests for the maintenance and measurement scripts that previously had none:
+  `benchmark_query.jl`, `benchmark_pu_similarity.jl`, `verify_production.jl` and
+  `run_pair_feasibility.jl`. The system-holdout analysis test now drives
+  `scripts/run_system_holdout.jl` itself rather than calling the module inline,
+  so every research entry point is executed by the suite.
 - Tests for `mp_element_pair.jl`, which had no coverage: protocol and baseline
   pin shape, output-overwrite guards, sibling module identity, and a check that
   every path recorded in a provenance manifest resolves on disk.

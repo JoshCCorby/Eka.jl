@@ -24,9 +24,15 @@ audit_mp_snapshot("snapshot","audit")
 split_mp_recovery("snapshot","audit","splits";synthetic=true,seeds=0:2,budgets=[1,4])
 benchmark_pu("splits","snapshot","audit","pilot";synthetic=true)
 MPSystemHoldout.LS.run_sensitivity("snapshot","audit","pilot","sensitivity";synthetic=true)
-MPSystemHoldout.run_system_holdout("snapshot","audit","sensitivity","results";synthetic=true)
 '''
         result=subprocess.run(["julia","--startup-file=no",f"--project={ROOT}","-e",code,str(ROOT)],cwd=cls.base,text=True,capture_output=True)
+        if result.returncode:
+            raise RuntimeError(result.stdout+result.stderr)
+        # Drive the real research entry point, not the module, so the script itself is covered.
+        result=subprocess.run(["julia","--startup-file=no",f"--project={ROOT}",
+                               str(ROOT/"scripts/run_system_holdout.jl"),
+                               "snapshot","audit","sensitivity","results","--synthetic"],
+                              cwd=cls.base,text=True,capture_output=True)
         if result.returncode:
             raise RuntimeError(result.stdout+result.stderr)
 
