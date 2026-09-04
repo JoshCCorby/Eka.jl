@@ -10,7 +10,7 @@ database.
 The source candidate contains Eka's Julia and Python source, methodological
 documentation, synthetic examples, tests, the small noticed Seko-derived fixture,
 aggregate prose findings, MIT licence, third-party notices and citation metadata.
-Git archive attributes exclude the personal auto-commit helper and activity log.
+Git archive attributes exclude local activity logs.
 Ignored local data and evidence directories are not members of the archive.
 
 The aggregate findings identify Materials Project as the data source, database
@@ -28,7 +28,7 @@ python scripts/verify_release.py --archive HEAD --output /tmp/eka-release-audit.
 
 The audit builds the actual Git archive and fails on:
 
-- local data, report, bot or activity-log paths;
+- local data, report or activity-log paths;
 - unreviewed JSONL/SQLite/database files, except the documented tiny fixture;
 - environment files and `Manifest.toml`;
 - symbolic links, hard links and other special archive members;
