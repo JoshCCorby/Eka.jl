@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Aqua.jl package-quality checks in the test suite. This required `[compat]`
+  entries for the test-only extras (`Aqua`, `Random`, `Test`), which Aqua's
+  dependency check inspects alongside `[deps]`. Method ambiguities, unbound type
+  parameters and type piracy were already clean. Adding Aqua changes
+  `Project.toml`, and so changes recorded `implementation_hashes` for subsequent
+  research runs; manifest keys are unaffected.
+- Coverage processing and upload on the Ubuntu current-Julia job. Upload is
+  non-blocking and needs a `CODECOV_TOKEN` repository secret to report.
+- Python 3.12, 3.13 and 3.14 in continuous integration, alongside 3.11. The four
+  independent analysers moved into their own `analysis` job so they actually
+  receive the version matrix; they previously ran only under 3.11 in the Julia
+  job, which the exporter job's matrix would not have covered.
+- Dependabot for GitHub Actions versions, and a CompatHelper workflow for Julia
+  bounds. `scripts/requirements-mp.txt` is deliberately excluded from automated
+  bumps.
+
 - `docs/api-stability.md`: the 0.1.x public API contract. Exported names are
   classified stable, stable-command-line, or experimental; database-schema and
   generated-report-format guarantees are stated, including that `schema_version`

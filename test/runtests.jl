@@ -5,6 +5,7 @@ include("fixtures/build_fixture.jl")
 
 @testset "Eka" begin
     include("test_api.jl")
+    include("test_aqua.jl")
     include("test_compositions.jl")
     include("test_database.jl")
     include("test_ranking.jl")

@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Action versions only. Julia bounds are handled by CompatHelper, and
+  # scripts/requirements-mp.txt is a deliberately pinned optional client that
+  # must not be bumped automatically.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "CI"

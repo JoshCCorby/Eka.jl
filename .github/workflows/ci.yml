@@ -6,13 +6,17 @@ on:
 
 jobs:
   mp-export:
-    name: Offline MP exporter tests
+    name: Offline MP exporter tests / Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
       - name: Verify source release archive
         run: |
           python -m unittest discover -s test -p 'test_release_audit.py' -v
@@ -39,12 +43,37 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
-      - uses: actions/setup-python@v5
+      - uses: julia-actions/julia-processcoverage@v1
         if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
+        continue-on-error: true
         with:
-          python-version: '3.11'
+          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+  analysis:
+    # The independent Python analysers are exercised across supported Python
+    # versions here; the Julia job above stays pure Julia across operating
+    # systems. Both need Julia, because each analyser consumes a bundle that the
+    # Julia pipeline produces.
+    name: Analysis / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Offline synthetic PU end-to-end example
-        if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
         shell: bash
         run: |
           julia --project=. examples/mp_recovery/make_snapshot.jl "$RUNNER_TEMP/pu-snapshot"
