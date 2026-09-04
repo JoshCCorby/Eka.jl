@@ -18,7 +18,7 @@ class SystemAnalysisTests(unittest.TestCase):
         subprocess.run(["julia", "--startup-file=no", f"--project={ROOT}",
                         str(ROOT/"examples/mp_recovery/make_system_snapshot.jl"), "snapshot"],
                        cwd=cls.base, check=True, capture_output=True)
-        code='''using Eka
+        code='''using EkaCompositions
 include(joinpath(ARGS[1],"src","mp_system_holdout.jl"))
 audit_mp_snapshot("snapshot","audit")
 split_mp_recovery("snapshot","audit","splits";synthetic=true,seeds=0:2,budgets=[1,4])

@@ -1,7 +1,7 @@
 function mp_test_snapshot(dir, body; overrides=Dict{String,Any}())
     snapshot = joinpath(dir, "snapshot")
     mkdir(snapshot)
-    bytes = Eka.MP_AUDIT_HEADER * "\n" * body
+    bytes = EkaCompositions.MP_AUDIT_HEADER * "\n" * body
     write(joinpath(snapshot, "records.tsv"), bytes)
     documents = Dict{String,Any}[]
     for line in split(chomp(body), '\n'; keepempty=false)
@@ -43,7 +43,7 @@ function mp_test_snapshot(dir, body; overrides=Dict{String,Any}())
         "dataset" => "Materials Project",
         "endpoint" => "https://api.materialsproject.org/materials/summary/",
         "scope" => "oxygen-containing ternaries; not oxidation-state-validated oxides",
-        "fields" => Eka.MP_SNAPSHOT_FIELDS, "retrieved_at_utc" => "2026-01-01T00:00:00+00:00",
+        "fields" => EkaCompositions.MP_SNAPSHOT_FIELDS, "retrieved_at_utc" => "2026-01-01T00:00:00+00:00",
         "mp_api_version" => "synthetic", "python_version" => "3.11.0",
         "exporter_sha256" => repeat("0", 64),
         "normalization" => "exact positive integral element counts only; Julia reduces ratios",

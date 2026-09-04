@@ -3,10 +3,10 @@ using .MPLabelSensitivity
 const LS = MPLabelSensitivity
 
 @testset "Versioned recovery protocol pins" begin
-    @test Eka.recovery_protocol("eka-mp-recovery-v1").sha256 == "f64c1fb803da3cc57aff658341b299824e3d662cc48039586a8bc10410bab21f"
-    @test Eka.recovery_protocol(LS.PROTOCOL).sha256 == bytes2hex(sha256(read(joinpath(@__DIR__, "..", "docs", "mp-label-sensitivity-protocol.md"))))
-    @test_throws ArgumentError Eka.recovery_protocol("eka-mp-recovery-v999")
-    @test_throws ArgumentError Eka.recovery_protocol("../mp-recovery-protocol.md")
+    @test EkaCompositions.recovery_protocol("eka-mp-recovery-v1").sha256 == "f64c1fb803da3cc57aff658341b299824e3d662cc48039586a8bc10410bab21f"
+    @test EkaCompositions.recovery_protocol(LS.PROTOCOL).sha256 == bytes2hex(sha256(read(joinpath(@__DIR__, "..", "docs", "mp-label-sensitivity-protocol.md"))))
+    @test_throws ArgumentError EkaCompositions.recovery_protocol("eka-mp-recovery-v999")
+    @test_throws ArgumentError EkaCompositions.recovery_protocol("../mp-recovery-protocol.md")
 end
 
 @testset "Policy membership and fixed-ranking evaluation semantics" begin
@@ -94,7 +94,7 @@ end
         configpath=joinpath(baseline.path,"config.toml")
         config=TOML.parsefile(configpath)
         config["deterministic_file_hashes"]["split-00/popularity.tsv"]=bytes2hex(sha256(read(ranking)))
-        Eka.recovery_write_toml(configpath,config)
+        EkaCompositions.recovery_write_toml(configpath,config)
         @test_throws ArgumentError LS.run_sensitivity(snapshot,audit,baseline.path,joinpath(dir,"bad");synthetic=true)
         @test !ispath(joinpath(dir,"bad"))
     end

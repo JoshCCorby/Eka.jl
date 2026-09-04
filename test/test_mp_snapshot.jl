@@ -36,7 +36,7 @@ end
         for (composition, reason) in ((Dict("Li" => 1.5), "fractional_counts"),
                 (Dict("O" => 0), "invalid_counts"), (Dict("O" => true), "invalid_counts"),
                 (Dict("Fe2+" => 1), "unsupported_species"), (Dict{String,Int}(), "missing_composition"))
-            @test Eka.mp_snapshot_formula(composition) == (".", reason)
+            @test EkaCompositions.mp_snapshot_formula(composition) == (".", reason)
         end
     end
 end

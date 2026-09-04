@@ -117,7 +117,7 @@ generated in this milestone.
 Rerun through the library using the saved configuration (with a fresh output path):
 
 ```julia
-using Eka, TOML
+using EkaCompositions, TOML
 report = "/tmp/eka-benchmark-demo"
 config = TOML.parsefile(joinpath(report, "config.toml"))
 benchmark_tsv(joinpath(report, config["input"]),

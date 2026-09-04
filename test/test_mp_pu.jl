@@ -77,7 +77,7 @@ end
 
 # Deterministic distinct oxygen-containing ternaries for size/streaming checks.
 function pu_similarity_pool(count; offset=0)
-    others = [e for e in Eka.ELEMENT_SYMBOLS if e != "O"]
+    others = [e for e in EkaCompositions.ELEMENT_SYMBOLS if e != "O"]
     pairs = [(a, b) for a in others for b in others if a < b]
     return [Composition("$(pairs[i+1][1])1$(pairs[i+1][2])2O3") for i in offset:(offset+count-1)]
 end
@@ -112,13 +112,13 @@ end
     pool = pu_similarity_pool(60)
     reference_training, reference_candidates = pool[1:25], pool[26:60]
     reference = [maximum(similarity(c, t) for t in reference_training) for c in reference_candidates]
-    @test Eka.pu_max_similarity(reference_candidates, reference_training) == reference
+    @test EkaCompositions.pu_max_similarity(reference_candidates, reference_training) == reference
     @test getproperty.(pu_rank(reference_training, reference_candidates; method="similarity"), :score) ==
         sort(reference; rev=true) # Descending score sequence; equal scores allowed.
     @test all(0.0 .<= reference .<= 1.0) && all(isfinite, reference)
     # Every candidate contains oxygen, so no in-scope pair can be fully disjoint.
     @test minimum(reference) > 0.0
-    @test Eka.pu_cosine(Eka.pu_vector(Composition("CaTiO3")), Eka.pu_vector(Composition("CaTiO3"))) == 1.0
+    @test EkaCompositions.pu_cosine(EkaCompositions.pu_vector(Composition("CaTiO3")), EkaCompositions.pu_vector(Composition("CaTiO3"))) == 1.0
 end
 
 @testset "PU similarity: training isolation, label independence and streaming cost" begin
@@ -165,11 +165,11 @@ end
     # of Float64 scores alone. The bound is deliberately loose but far below that.
     stream_training, stream_candidates = pu_similarity_pool(300), pu_similarity_pool(600; offset=300)
     @test isempty(intersect(Set(stream_training), Set(stream_candidates)))
-    Eka.pu_max_similarity(stream_candidates[1:2], stream_training[1:2])
-    used = @allocated Eka.pu_max_similarity(stream_candidates, stream_training)
+    EkaCompositions.pu_max_similarity(stream_candidates[1:2], stream_training[1:2])
+    used = @allocated EkaCompositions.pu_max_similarity(stream_candidates, stream_training)
     @test used < 300_000
     @test used < length(stream_training) * length(stream_candidates) * sizeof(Float64)
-    @test length(Eka.pu_max_similarity(stream_candidates, stream_training)) == length(stream_candidates)
+    @test length(EkaCompositions.pu_max_similarity(stream_candidates, stream_training)) == length(stream_candidates)
 end
 
 function pu_test_bundle(dir)
@@ -187,11 +187,11 @@ function pu_rehash_test_bundle(bundle, member=nothing)
         m = TOML.parsefile(path)
         if member !== nothing
             m["membership_hashes"][member] = bytes2hex(sha256(read(joinpath(dirname(path), split(member, '/')...))))
-            Eka.recovery_write_toml(path, m)
+            EkaCompositions.recovery_write_toml(path, m)
         end
         root["split_manifest_hashes"][name] = bytes2hex(sha256(read(path)))
     end
-    Eka.recovery_write_toml(rootpath, root)
+    EkaCompositions.recovery_write_toml(rootpath, root)
 end
 
 @testset "PU verified bundle loader and evaluator" begin
@@ -284,21 +284,21 @@ end
         for (key,value) in (("tie_seed",7),("ranking_seeds",[7,8]),("split_seeds",[0,0]),
                           ("split_count",1),("positive_count",11),("scope","other"),("is_synthetic",false))
             reject() do
-                p=joinpath(bundle,"manifest.toml");m=TOML.parsefile(p);m[key]=value;Eka.recovery_write_toml(p,m)
+                p=joinpath(bundle,"manifest.toml");m=TOML.parsefile(p);m[key]=value;EkaCompositions.recovery_write_toml(p,m)
             end
         end
         reject() do
             p=joinpath(bundle,"manifest.toml");m=TOML.parsefile(p)
-            delete!(m["split_manifest_hashes"],"split-01/manifest.toml");Eka.recovery_write_toml(p,m)
+            delete!(m["split_manifest_hashes"],"split-01/manifest.toml");EkaCompositions.recovery_write_toml(p,m)
         end
         reject() do
             p=joinpath(bundle,"split-00/manifest.toml");m=TOML.parsefile(p)
-            m["membership_hashes"]["../../outside"]="bad";Eka.recovery_write_toml(p,m)
+            m["membership_hashes"]["../../outside"]="bad";EkaCompositions.recovery_write_toml(p,m)
             pu_rehash_test_bundle(bundle)
         end
         reject() do
             p=joinpath(bundle,"manifest.toml");m=TOML.parsefile(p)
-            m["implementation_hashes"]["../../outside"]="bad";Eka.recovery_write_toml(p,m)
+            m["implementation_hashes"]["../../outside"]="bad";EkaCompositions.recovery_write_toml(p,m)
         end
     end
 end

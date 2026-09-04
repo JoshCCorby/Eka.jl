@@ -1,6 +1,6 @@
 # Synthetic development only: accepts no real-data, membership or label paths.
 include(joinpath(@__DIR__,"..","src","element_pair_model.jl"))
-using .ElementPairModel, Eka, SHA, TOML
+using .ElementPairModel, EkaCompositions, SHA, TOML
 const EP=ElementPairModel
 
 function small_case()
@@ -45,17 +45,17 @@ function main(args)
             ranked=ranking.value
             EP.check(length(ranked)==length(candidates),"incomplete coverage")
             p=joinpath(target,name);mkdir(p)
-            write(joinpath(p,"training.tsv"),Eka.recovery_formulas(Composition.(model.training)))
-            write(joinpath(p,"candidates.tsv"),Eka.recovery_formulas(sort!(Composition.(candidates);by=formula)))
-            Eka.pu_write_rows(joinpath(p,"objective.tsv"),keys(first(model.trace)),model.trace)
+            write(joinpath(p,"training.tsv"),EkaCompositions.recovery_formulas(Composition.(model.training)))
+            write(joinpath(p,"candidates.tsv"),EkaCompositions.recovery_formulas(sort!(Composition.(candidates);by=formula)))
+            EkaCompositions.pu_write_rows(joinpath(p,"objective.tsv"),keys(first(model.trace)),model.trace)
             factorrows=[(element=EP.ELEMENTS[i],factor=k,value=model.factors[i,k],seen_in_training=model.active[i]) for i in 1:117 for k in 1:settings.rank]
-            Eka.pu_write_rows(joinpath(p,"factors.tsv"),keys(first(factorrows)),factorrows)
+            EkaCompositions.pu_write_rows(joinpath(p,"factors.tsv"),keys(first(factorrows)),factorrows)
             rows=[(rank=i,composition=formula(r.composition),score=r.score,coverage=r.coverage,observed_training_pair=r.observed_training_pair,tie_key=r.tie_key) for (i,r) in enumerate(ranked)]
-            Eka.pu_write_rows(joinpath(p,"ranking.tsv"),keys(first(rows)),rows)
+            EkaCompositions.pu_write_rows(joinpath(p,"ranking.tsv"),keys(first(rows)),rows)
             if name=="small"
                 heldout=Composition.(small_case()[3]);m=pu_metrics([r.composition for r in ranked],heldout;budgets=[1,4,10])
-                Eka.pu_write_rows(joinpath(p,"synthetic-metrics.tsv"),keys(first(m)),m)
-                write(joinpath(p,"synthetic-heldout.tsv"),Eka.recovery_formulas(sort!(heldout;by=formula)))
+                EkaCompositions.pu_write_rows(joinpath(p,"synthetic-metrics.tsv"),keys(first(m)),m)
+                write(joinpath(p,"synthetic-heldout.tsv"),EkaCompositions.recovery_formulas(sort!(heldout;by=formula)))
             end
             push!(summaries,(case=name,training_count=length(training),candidate_count=length(candidates),active_elements=count(model.active),
                 cold_candidates=count(r->r.coverage=="unseen_element_zero",ranked),unobserved_known_pairs=count(r->r.coverage=="known_elements"&&!r.observed_training_pair,ranked),
@@ -64,15 +64,15 @@ function main(args)
                 distinct_scores=length(unique(r.score for r in ranked))))
             push!(times,(case=name,cold_fit_seconds=cold.time,warm_fit_seconds=warm.time,ranking_seconds=ranking.time,warm_fit_allocated_bytes=warm.bytes))
         end
-        Eka.pu_write_rows(joinpath(target,"summary.tsv"),keys(first(summaries)),summaries)
-        Eka.pu_write_rows(joinpath(target,"runtime.tsv"),keys(first(times)),times)
+        EkaCompositions.pu_write_rows(joinpath(target,"summary.tsv"),keys(first(summaries)),summaries)
+        EkaCompositions.pu_write_rows(joinpath(target,"runtime.tsv"),keys(first(times)),times)
         root=normpath(joinpath(@__DIR__,".."))
         files=["src/element_pair_model.jl","scripts/run_pair_feasibility.jl","docs/mp-learned-feasibility.md","Project.toml"]
         isfile(joinpath(root,"Manifest.toml"))&&push!(files,"Manifest.toml")
         for name in files;p=joinpath(target,"implementation",name);mkpath(dirname(p));write(p,read(joinpath(root,name)));end
         hashes=Dict(replace(relpath(joinpath(d,n),target),'\\'=>'/')=>bytes2hex(sha256(read(joinpath(d,n)))) for (d,_,ns) in walkdir(target) for n in ns if n!="runtime.tsv")
         config=Dict("model_id"=>EP.MODEL_ID,"is_synthetic"=>true,"settings"=>settingsdict,"julia_version"=>string(VERSION),"deterministic_file_hashes"=>hashes)
-        Eka.recovery_write_toml(joinpath(target,"config.toml"),config)
+        EkaCompositions.recovery_write_toml(joinpath(target,"config.toml"),config)
         println("Synthetic pair-model feasibility complete: ",target)
     catch
         rm(target;recursive=true);rethrow()

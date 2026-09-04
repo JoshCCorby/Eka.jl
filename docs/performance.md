@@ -22,7 +22,7 @@ julia --startup-file=no --project=. scripts/benchmark_query.jl
 /usr/bin/time -p julia --startup-file=no --project=. bin/eka -e Al Si O -n 4 -d test/fixtures/tiny_test.db
 ```
 
-The internal `@timed` measurements include connection opening, header/schema checks, parameterized SQL execution, formula parsing, element/arity filtering, sorting, and connection cleanup. They exclude Julia process startup, loading `Eka`, and compilation that occurs before the timed expression. The separate shell measurement includes the whole CLI process but was taken after package precompilation completed.
+The internal `@timed` measurements include connection opening, header/schema checks, parameterized SQL execution, formula parsing, element/arity filtering, sorting, and connection cleanup. They exclude Julia process startup, loading `EkaCompositions`, and compilation that occurs before the timed expression. The separate shell measurement includes the whole CLI process but was taken after package precompilation completed.
 
 Warm measurements reuse a Julia process, not a database connection; every call opens and closes its own connection. They may benefit from the OS filesystem cache. The first process measurement is not a cold-disk measurement.
 

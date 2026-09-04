@@ -24,12 +24,12 @@ end
 @testset "System grouping, policy alignment and diagnostics" begin
     @test SH.system("O6Ti2Ba2")==SH.system("BaTiO3")=="Ba-O-Ti"
     @test SH.system("SrTiO3")!="Ba-O-Ti"
-    @test Eka.recovery_protocol(SH.PROTOCOL).sha256==bytes2hex(sha256(read(joinpath(@__DIR__,"..","docs","mp-system-holdout-protocol.md"))))
+    @test EkaCompositions.recovery_protocol(SH.PROTOCOL).sha256==bytes2hex(sha256(read(joinpath(@__DIR__,"..","docs","mp-system-holdout-protocol.md"))))
     @test SH.diagnostic([0.0,0.5,0.9,1.0])==(n=4,mean=0.6,min=0.0,p10=0.0,median=0.5,p90=1.0,max=1.0,fraction_ge_09=0.5,fraction_ge_099=0.25)
     @test SH.concentration(Composition.(["LiNaO","Li2NaO","MgNaO"]))==(largest=2/3,top5=1.0)
     mktempdir() do dir
         snapshot,audit=system_test_inputs(dir)
-        source=Eka.recovery_verified_inputs(snapshot,audit;synthetic=true)
+        source=EkaCompositions.recovery_verified_inputs(snapshot,audit;synthetic=true)
         groups=SH.source_groups(source)
         branches=SH.preflight(groups;seeds=0:19,budgets=[1,4])
         @test length(branches)==120
@@ -89,7 +89,7 @@ end
         write(p,replace(read(p,String),"positive"=>"unlabelled";count=1))
         confpath=joinpath(baseline.path,"config.toml");cfg=TOML.parsefile(confpath)
         cfg["deterministic_file_hashes"][ranking]=bytes2hex(sha256(read(p)))
-        Eka.recovery_write_toml(confpath,cfg)
+        EkaCompositions.recovery_write_toml(confpath,cfg)
         @test_throws ArgumentError SH.run_system_holdout(snapshot,audit,baseline.path,joinpath(dir,"corrupt");synthetic=true)
         @test !ispath(joinpath(dir,"corrupt"))
     end

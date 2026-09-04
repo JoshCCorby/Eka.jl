@@ -1,9 +1,9 @@
 """Synthetic-stage element-pair factor model; loaded explicitly, outside the frozen CLI."""
 module ElementPairModel
-using Eka, SHA
+using EkaCompositions, SHA
 
 const MODEL_ID="eka-element-pair-symnmf-v1"
-const ELEMENTS=sort!([e for e in Eka.ELEMENT_SYMBOLS if e!="O"])
+const ELEMENTS=sort!([e for e in EkaCompositions.ELEMENT_SYMBOLS if e!="O"])
 const INDEX=Dict(e=>i for (i,e) in enumerate(ELEMENTS))
 check(ok,message)=ok || throw(ArgumentError(message))
 
@@ -31,7 +31,7 @@ function pair(c::Composition)
 end
 
 function training_data(training)
-    cs=sort!(Eka.pu_compositions(training,"training");by=formula)
+    cs=sort!(EkaCompositions.pu_compositions(training,"training");by=formula)
     n=length(ELEMENTS);counts=zeros(Int,n,n);active=falses(n)
     for c in cs
         a,b=pair(c);counts[a,b]+=1;counts[b,a]+=1;active[a]=active[b]=true
@@ -129,7 +129,7 @@ score(model::Model,f::AbstractString)=score(model,Composition(f))
 
 function rank_candidates(model,candidates;tie_seed=20260901)
     check(tie_seed isa Integer && !(tie_seed isa Bool) && tie_seed>=0,"invalid tie seed")
-    cs=Eka.pu_compositions(candidates,"candidates")
+    cs=EkaCompositions.pu_compositions(candidates,"candidates")
     check(isempty(intersect(Set(model.training),Set(formula.(cs)))),"training/candidate composition overlap")
     rows=[(composition=c,score(model,c)...,tie_key=bytes2hex(sha256("eka-pu-tie-v1\n$tie_seed\n$(formula(c))"))) for c in cs]
     return sort!(rows;by=r->(-r.score,r.tie_key,formula(r.composition)))

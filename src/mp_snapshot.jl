@@ -116,7 +116,7 @@ function write_synthetic_mp_snapshot(documents, target::AbstractString; database
         "query_elements" => ["O"], "query_num_elements" => 3,
         "query_deprecated" => false, "query_include_gnome" => false,
         "fields" => MP_SNAPSHOT_SELECTED_FIELDS, "record_count" => length(pairs),
-        "producer" => "Eka.write_synthetic_mp_snapshot",
+        "producer" => "EkaCompositions.write_synthetic_mp_snapshot",
         "producer_language" => "Julia",
         "producer_version" => string(Base.pkgversion(@__MODULE__)),
         "producer_sha256" => bytes2hex(sha256(read(@__FILE__))),

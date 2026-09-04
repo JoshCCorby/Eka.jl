@@ -20,7 +20,7 @@ class ReleaseAuditTests(unittest.TestCase):
             "README.md": b"Materials Project attribution",
             "THIRD_PARTY_NOTICES.md": b"Seko BSD notice",
             "CITATION.cff": b"cff-version: 1.2.0",
-            "src/Eka.jl": b"module Eka\nend",
+            "src/EkaCompositions.jl": b"module EkaCompositions\nend",
             "test/fixtures/tiny_test.db": b"SQLite fixture",
         }
         result = release.audit_entries(entries)
@@ -43,7 +43,7 @@ class ReleaseAuditTests(unittest.TestCase):
         self.assertIn("machine-specific home path", joined)
 
     def test_dot_path_is_normalized_without_hiding_parent_traversal(self):
-        self.assertEqual("src/Eka.jl", release.normalize_path("src/./Eka.jl"))
+        self.assertEqual("src/EkaCompositions.jl", release.normalize_path("src/./EkaCompositions.jl"))
         self.assertEqual("../secret", release.normalize_path("../secret"))
 
     def test_archive_rejects_symlink_members(self):

@@ -1,4 +1,4 @@
-using Eka, Printf
+using EkaCompositions, Printf
 
 function report(label, measurement)
     @printf("%-26s %10.3f ms  %10d bytes  %d results\n",
@@ -8,7 +8,7 @@ end
 function benchmark_query(path; repeats=20)
     println("Julia ", VERSION, " | database: ", abspath(path))
     println("Includes opening, schema inspection, SQL query, parsing, filtering, and sorting.")
-    # Compilation/loading of `using Eka` is outside these measurements.
+    # Compilation/loading of `using EkaCompositions` is outside these measurements.
     cold = @timed query_compositions(path; elements=["Al", "Si", "O"], nary=[4])
     report("First query in process", cold)
     samples = [@timed(query_compositions(path; elements=["Al", "Si", "O"], nary=[4])) for _ in 1:repeats]

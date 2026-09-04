@@ -24,7 +24,7 @@ The run's environment directory and freeze record bind the actual lockfile bytes
 
 The local manifest retains an unused historical `Recommender` package entry at
 path `.`. Preserve it unchanged for this run: the clean-checkout restore and tests
-established that `Eka` resolves and runs correctly with those exact bytes. This is
+established that `EkaCompositions` resolves and runs correctly with those exact bytes. This is
 an environment record, not an instruction to reintroduce the old package name.
 
 ## Restore a fresh checkout

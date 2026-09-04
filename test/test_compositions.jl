@@ -18,8 +18,8 @@
     @test isimmutable(a) && isimmutable(a.terms)
     @test Composition("O2") == Composition("O")
     @test formula(Composition("NaCl")) == "Cl1Na1"
-    @test length(Eka.ELEMENT_SYMBOLS) == 118
-    for symbol in Eka.ELEMENT_SYMBOLS
+    @test length(EkaCompositions.ELEMENT_SYMBOLS) == 118
+    for symbol in EkaCompositions.ELEMENT_SYMBOLS
         @test formula(Composition(symbol)) == symbol * "1"
     end
     for invalid in ("", "mg2Zn", "Xx2", "Mg0", "Mg01", "Mg-2", "2Mg", "Mg1.5Zn", "Mg(OH)2", "Mg Zn", "Mg\n", "Mg+", "Mg₂", "Mg999999999999999999999999")

@@ -227,7 +227,7 @@ function split_mp_recovery(snapshot::AbstractString, audit::AbstractString, outp
     # without requiring a git executable or writing a user's repository metadata.
     code = Dict(name => read(joinpath(@__DIR__, "..", name)) for name in (
         "src/mp_recovery.jl", "src/mp_audit.jl", "src/compositions.jl", "src/benchmark.jl",
-        "src/Eka.jl", "src/cli.jl", "scripts/export_mp_pilot.py", "Project.toml"))
+        "src/EkaCompositions.jl", "src/cli.jl", "scripts/export_mp_pilot.py", "Project.toml"))
     manifest = Dict{String,Any}(
         "schema_version" => 1, "protocol_id" => synthetic ? "eka-mp-recovery-synthetic-v1" : MP_RECOVERY_PROTOCOL,
         "protocol_sha256" => bytes2hex(sha256(protocol_bytes)), "scope" => MP_RECOVERY_SCOPE,

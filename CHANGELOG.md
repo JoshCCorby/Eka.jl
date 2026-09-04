@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The `EkaCompositions` Julia package and `eka` command-line entry point.
 - Canonical, validated chemical compositions with ratio reduction, deterministic
   equality and hashing, and explicit rejection of unsupported formula syntax.
 - Read-only queries for standard and supported legacy SQLite score databases,
@@ -54,5 +55,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release auditing checks source archives for common credential and private-key
   patterns before publication.
 
-[Unreleased]: https://github.com/JoshCCorby/Eka.jl/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/JoshCCorby/Eka.jl/releases/tag/v0.1.0
+[Unreleased]: https://github.com/JoshCCorby/EkaCompositions.jl/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/JoshCCorby/EkaCompositions.jl/releases/tag/v0.1.0

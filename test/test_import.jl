@@ -1,7 +1,7 @@
 using SHA
 
 function read_metadata(path)
-    Eka.with_database(path) do db
+    EkaCompositions.with_database(path) do db
         Dict(String(r.key) => String(r.value) for r in DBInterface.execute(db, "SELECT key, value FROM import_metadata"))
     end
 end
@@ -16,7 +16,7 @@ end
         @test query_compositions(destination) == [(Composition("NaCl"), 1.2), (Composition("Mg2Zn"), 0.4)]
         @test read_metadata(destination)["source"] == "hand-authored v1"
         @test read_metadata(destination)["records_sha256"] == result.records_sha256
-        Eka.with_database(destination) do db
+        EkaCompositions.with_database(destination) do db
             @test first(DBInterface.execute(db, "SELECT source_formula FROM compositions WHERE source_row = 1")).source_formula == "Zn2Mg4"
         end
         before = read(destination)

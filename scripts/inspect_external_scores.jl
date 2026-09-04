@@ -5,7 +5,7 @@ module InspectExternalScores
 
 using ArgParse
 using DBInterface
-using Eka
+using EkaCompositions
 using Printf
 using SHA
 
@@ -32,18 +32,18 @@ function read_audit(path::AbstractString)
 end
 
 function read_scores(path::AbstractString; element="O", table="data3")
-    Eka.validate_element(element)
+    EkaCompositions.validate_element(element)
     scores = Dict{String,Vector{Float64}}()
     rows = 0
     in_scope = 0
     duplicates = 0
-    Eka.with_database(path) do database
-        tables = Eka.composition_tables(database)
+    EkaCompositions.with_database(path) do database
+        tables = EkaCompositions.composition_tables(database)
         selected = findfirst(candidate -> candidate.name == table, tables)
         selected === nothing && throw(ArgumentError("score database has no supported table named $table"))
         descriptor = tables[selected]
         descriptor.nary == 3 || throw(ArgumentError("table $table is not a legacy ternary table"))
-        query = "SELECT ele1, ele2, ele3, int1, int2, int3, score FROM " * Eka.quote_identifier(table)
+        query = "SELECT ele1, ele2, ele3, int1, int2, int3, score FROM " * EkaCompositions.quote_identifier(table)
         for row in DBInterface.execute(database, query)
             rows += 1
             elements = String[row.ele1, row.ele2, row.ele3]

@@ -1,10 +1,14 @@
-# Eka.jl
+# Eka
 
 **Reading the gaps in the inorganic record.**
 
 Created by **Joshua Corbett**.
 
-A Julia library and command-line toolkit for **composition ranking and reproducible recovery benchmarks**. Explore precomputed scores in SQLite, import already-scored records, or audit Materials Project snapshots and evaluate positive–unlabelled (PU) recovery methods on verified composition splits.
+The `EkaCompositions.jl` package and `eka` command-line toolkit provide
+**composition ranking and reproducible recovery benchmarks**. Explore precomputed
+scores in SQLite, import already-scored records, or audit Materials Project
+snapshots and evaluate positive–unlabelled (PU) recovery methods on verified
+composition splits.
 
 The SQLite workflow supports score and reference-composition similarity ranking. The original PU workflow implements random, training-only element popularity, and maximum similarity to training compositions. A separately versioned research workflow evaluates a fixed-compute element-pair factor model. It does not establish stability, synthesizability, or experimental validity. **The Materials Project pilot, label-sensitivity analyses, system-holdout comparison and element-pair evaluation have been run and reproduced locally; data and detailed results remain outside Git pending final release review.**
 
@@ -141,7 +145,7 @@ With `--rank similarity`, ordering is descending similarity, then stored score, 
 ## Library usage
 
 ```julia
-using Eka
+using EkaCompositions
 
 composition = Composition("Zn1Mg2")
 @assert formula(composition) == "Mg2Zn1"
@@ -213,7 +217,7 @@ Extend the dispatch interface without changing database code:
 
 ```julia
 struct PreferBinary <: AbstractRankingMethod end
-Eka.ranking_value(::PreferBinary, c::Composition, score::Real) = length(c) == 2 ? 1.0 : 0.0
+EkaCompositions.ranking_value(::PreferBinary, c::Composition, score::Real) = length(c) == 2 ? 1.0 : 0.0
 ranked = rank_compositions(rows, PreferBinary())
 ```
 
@@ -272,7 +276,7 @@ The fixture generator refuses to overwrite existing files. To create a separate 
 julia --project=. test/fixtures/build_fixture.jl /path/to/new-fixture.db
 ```
 
-[GitHub Actions](https://github.com/JoshCCorby/Eka.jl/actions/workflows/ci.yml) runs Julia 1.10 and current stable on Linux, current stable on macOS and Windows, and Python 3.11 exporter and independent-analysis tests. The current-Julia Linux job also runs the offline Julia fixture → audit → split → PU evaluation example. Check the linked workflow for the status of a specific commit.
+[GitHub Actions](https://github.com/JoshCCorby/EkaCompositions.jl/actions/workflows/ci.yml) runs Julia 1.10 and current stable on Linux, current stable on macOS and Windows, and Python 3.11 exporter and independent-analysis tests. The current-Julia Linux job also runs the offline Julia fixture → audit → split → PU evaluation example. Check the linked workflow for the status of a specific commit.
 
 ## SQLite query performance
 
@@ -331,7 +335,7 @@ workflows are developed by **Joshua Corbett**.
 
 - **Materials Project:** the recovery pilot and label-sensitivity experiments use
   an API snapshot from [Materials Project](https://materialsproject.org/), with
-  grouping, splits and ranking implemented in Eka. Seko's scores are excluded
+  grouping, splits and ranking implemented in EkaCompositions. Seko's scores are excluded
   from these comparisons; see the [score provenance review](docs/mp-external-score-provenance.md).
 - **Seko database:** the optional SQLite workflow can query the separately
   downloaded database from [Atsuto Seko and collaborators](https://github.com/sekocha/recommender).

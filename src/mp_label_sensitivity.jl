@@ -1,7 +1,7 @@
 """Follow-on label sensitivity; loaded explicitly by the research script, not v1's CLI."""
 module MPLabelSensitivity
 
-using Eka, SHA, TOML
+using EkaCompositions, SHA, TOML
 
 const PROTOCOL = "eka-mp-label-sensitivity-v1"
 const POLICIES = ("original", "exclude_mixed", "unlabel_mixed")
@@ -65,7 +65,7 @@ end
 function verified_baseline(pilot, snapshot, audit; synthetic)
     loaded = load_mp_recovery(joinpath(pilot, "inputs"), snapshot, audit; synthetic)
     config_bytes = read(joinpath(pilot, "config.toml"))
-    config = Eka.recovery_toml(config_bytes, "original pilot config")
+    config = EkaCompositions.recovery_toml(config_bytes, "original pilot config")
     captures = Dict("config.toml" => config_bytes)
     # Recompute v1 only as a compatibility/integrity check. Evaluation-only
     # subsequently consumes the original captured rankings, not refitted scores.
@@ -89,10 +89,10 @@ end
 
 function write_membership(folder, split)
     mkpath(joinpath(folder, "inputs")); mkpath(joinpath(folder, "evaluation"))
-    write(joinpath(folder, "inputs/training.tsv"), Eka.recovery_formulas(split.inputs.training))
-    write(joinpath(folder, "inputs/candidates.tsv"), Eka.recovery_formulas(split.inputs.candidates))
-    write(joinpath(folder, "evaluation/heldout.tsv"), Eka.recovery_formulas(split.evaluation.heldout))
-    Eka.pu_write_rows(joinpath(folder, "evaluation/labels.tsv"), (:composition, :label),
+    write(joinpath(folder, "inputs/training.tsv"), EkaCompositions.recovery_formulas(split.inputs.training))
+    write(joinpath(folder, "inputs/candidates.tsv"), EkaCompositions.recovery_formulas(split.inputs.candidates))
+    write(joinpath(folder, "evaluation/heldout.tsv"), EkaCompositions.recovery_formulas(split.evaluation.heldout))
+    EkaCompositions.pu_write_rows(joinpath(folder, "evaluation/labels.tsv"), (:composition, :label),
         [(composition=formula(c), label=l) for (c,l) in zip(split.inputs.candidates, split.evaluation.labels)])
 end
 
@@ -101,9 +101,9 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
     target = abspath(output)
     check(!(ispath(target) || islink(target)), "refusing to overwrite sensitivity output")
     check(isdir(dirname(target)), "output parent must exist")
-    protocol = Eka.recovery_protocol(PROTOCOL)
-    source = Eka.recovery_verified_inputs(snapshot, audit; synthetic)
-    raw_groups = Eka.recovery_group_rows(source.files["audit/compositions.tsv"])
+    protocol = EkaCompositions.recovery_protocol(PROTOCOL)
+    source = EkaCompositions.recovery_verified_inputs(snapshot, audit; synthetic)
+    raw_groups = EkaCompositions.recovery_group_rows(source.files["audit/compositions.tsv"])
     groups = [(composition=r[1], label=r[3], mixed=parse(Int,r[5]) > 0 && parse(Int,r[6]) > 0) for r in values(raw_groups)]
     mixed = Set(Composition(r.composition) for r in groups if r.mixed)
     # Validate every branch before any alternative ranking is computed.
@@ -118,7 +118,7 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
     baseline = verified_baseline(pilot, snapshot, audit; synthetic)
     check(baseline.loaded.files == loaded.files, "baseline membership changed during verification")
     metrics, runtimes = NamedTuple[], NamedTuple[]
-    code_names = [collect(Eka.PU_PRODUCER_FILES); "src/mp_pu.jl"; "src/mp_label_sensitivity.jl"; "scripts/run_label_sensitivity.jl"]
+    code_names = [collect(EkaCompositions.PU_PRODUCER_FILES); "src/mp_pu.jl"; "src/mp_label_sensitivity.jl"; "scripts/run_label_sensitivity.jl"]
     root = normpath(joinpath(@__DIR__, ".."))
     isfile(joinpath(root, "Manifest.toml")) && push!(code_names, "Manifest.toml")
     code = Dict(name => read(joinpath(root, name)) for name in code_names)
@@ -126,7 +126,7 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
         "protocol_id"=>PROTOCOL, "protocol_sha256"=>protocol.sha256,
         "is_synthetic"=>synthetic, "modes"=>collect(MODES), "policies"=>collect(POLICIES), "methods"=>collect(METHODS),
         "split_seeds"=>seeds, "ranking_seeds"=>seeds .+ 10000, "tie_seed"=>20260901, "budgets"=>budgets,
-        "julia_version"=>string(VERSION), "package_version"=>string(Base.pkgversion(Eka)),
+        "julia_version"=>string(VERSION), "package_version"=>string(Base.pkgversion(EkaCompositions)),
         "mixed_group_count"=>length(mixed), "original_pilot_config_sha256"=>digest(baseline.captures["config.toml"]),
         "input_hashes"=>Dict(name=>digest(bytes) for (name,bytes) in source.files),
         "implementation_hashes"=>Dict(name=>digest(bytes) for (name,bytes) in code),
@@ -158,7 +158,7 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
                 ranking_rows=[(rank=i,composition=formula(x.row.composition),score=x.row.score === nothing ? "" : string(x.row.score),
                     random_key=x.row.random_key,tie_key=x.row.tie_key,observed_label=x.row.composition in heldout ? "positive" : "unlabelled",
                     original_rank=fixed ? string(x.original_rank) : "") for (i,x) in enumerate(selected)]
-                Eka.pu_write_rows(joinpath(folder,"$method.tsv"),keys(first(ranking_rows)),ranking_rows)
+                EkaCompositions.pu_write_rows(joinpath(folder,"$method.tsv"),keys(first(ranking_rows)),ranking_rows)
                 values=pu_metrics([r.composition for r in ranked],split.evaluation.heldout;budgets)
                 if policy == "original"
                     original_split=only(s for s in loaded.result.splits if s.seed==split.seed)
@@ -176,8 +176,8 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
             end
         end
         check(length(metrics)==length(MODES)*length(POLICIES)*length(seeds)*length(METHODS)*length(budgets),"incomplete metric grid")
-        Eka.pu_write_rows(joinpath(target,"metrics.tsv"),keys(first(metrics)),metrics)
-        Eka.pu_write_rows(joinpath(target,"runtime.tsv"),keys(first(runtimes)),runtimes)
+        EkaCompositions.pu_write_rows(joinpath(target,"metrics.tsv"),keys(first(metrics)),metrics)
+        EkaCompositions.pu_write_rows(joinpath(target,"runtime.tsv"),keys(first(runtimes)),runtimes)
         write(joinpath(target,"README.md"),"# Label sensitivity outputs\n\nLocal unreviewed derivatives. Six branches retain every declared method, seed and budget.\nEvaluation-only keeps original training and scores; exclusion compacts eligible ranks and records original depth.\nFull-pipeline rebuilds labels, membership and training-derived scores.\nOriginal controls match v1 exactly. See protocol.md and metrics.tsv; runtime.tsv is nondeterministic.\n")
         hashes=Dict{String,String}()
         for (dir,_,names) in walkdir(target), name in names
@@ -186,7 +186,7 @@ function run_sensitivity(snapshot, audit, pilot, output; synthetic=false)
             hashes[relative]=digest(read(path))
         end
         config["deterministic_file_hashes"]=hashes
-        Eka.recovery_write_toml(joinpath(target,"config.toml"),config)
+        EkaCompositions.recovery_write_toml(joinpath(target,"config.toml"),config)
     catch
         rm(target;recursive=true)
         rethrow()

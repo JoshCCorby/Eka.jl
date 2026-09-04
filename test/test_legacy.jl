@@ -9,7 +9,7 @@ function build_legacy_fixture(path)
     db = SQLite.DB(path)
     try
         for name in sort!(collect(keys(LEGACY_ROWS)))
-            n = Eka.LEGACY_TABLES[name]
+            n = EkaCompositions.LEGACY_TABLES[name]
             columns = ["composition TEXT"]
             append!(columns, ["ele$i TEXT" for i in 1:n])
             append!(columns, ["int$i INTEGER" for i in 1:n])
@@ -50,7 +50,7 @@ end
         @test_throws ArgumentError query_compositions(path; elements=["Zn' OR 1=1 --"])
         @test original == read(path)
         # The connection itself, not merely a convention, prevents writes.
-        @test_throws ArgumentError Eka.with_database(path) do db
+        @test_throws ArgumentError EkaCompositions.with_database(path) do db
             DBInterface.execute(db, "DELETE FROM data2")
         end
         @test original == read(path)

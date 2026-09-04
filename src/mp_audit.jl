@@ -146,7 +146,7 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
     else
         get(metadata, "is_synthetic", nothing) === true ||
             throw(ArgumentError("snapshot schema 2 is restricted to synthetic data"))
-        get(metadata, "producer", nothing) == "Eka.write_synthetic_mp_snapshot" ||
+        get(metadata, "producer", nothing) == "EkaCompositions.write_synthetic_mp_snapshot" ||
             throw(ArgumentError("snapshot has an unknown schema 2 producer"))
         get(metadata, "producer_language", nothing) == "Julia" ||
             throw(ArgumentError("snapshot schema 2 must declare Julia as its producer language"))

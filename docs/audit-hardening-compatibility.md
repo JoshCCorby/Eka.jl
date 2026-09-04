@@ -49,7 +49,7 @@ not a replacement experiment or an additional replicate.
 
 The full local Julia and Python suites passed after the change, and the exact
 source archive passed its content audit. GitHub Actions run
-[`33446865634`](https://github.com/JoshCCorby/Eka.jl/actions/runs/33446865634)
+[`33446865634`](https://github.com/JoshCCorby/EkaCompositions.jl/actions/runs/33446865634)
 passed on Linux, macOS and Windows configurations for `b1d3ef5`.
 
 This check establishes internal compatibility and file consistency. It does not

@@ -1,4 +1,4 @@
-using Eka, Printf, SHA
+using EkaCompositions, Printf, SHA
 
 # Synthetic-only runtime and memory measurement for the PU similarity comparator.
 # It uses generated formulas at the size the frozen protocol implies for one real
@@ -6,7 +6,7 @@ using Eka, Printf, SHA
 # split bundle, MP record, or evaluation label is read, and nothing here produces
 # or inspects a recovery result. See docs/mp-pu-evaluation.md.
 
-const NON_OXYGEN = [symbol for symbol in Eka.ELEMENT_SYMBOLS if symbol != "O"]
+const NON_OXYGEN = [symbol for symbol in EkaCompositions.ELEMENT_SYMBOLS if symbol != "O"]
 
 """
     synthetic_pool(count; offset=0)
@@ -44,10 +44,10 @@ function benchmark_pu_similarity(; training_count::Int=4288, candidate_count::In
     @printf("A full candidate-by-training Float64 matrix would need %.1f MiB; the streamed maximum never allocates it.\n", matrix)
 
     # Warm up compilation outside the reported measurements.
-    Eka.pu_max_similarity(candidates[1:8], training[1:8])
+    EkaCompositions.pu_max_similarity(candidates[1:8], training[1:8])
     pu_rank(training[1:8], candidates[1:8]; method="similarity")
 
-    scores = @timed Eka.pu_max_similarity(candidates, training)
+    scores = @timed EkaCompositions.pu_max_similarity(candidates, training)
     report("Streamed maximum similarity", scores, pairs)
     @assert length(scores.value) == candidate_count && all(s -> 0.0 <= s <= 1.0, scores.value)
 

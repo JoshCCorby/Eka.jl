@@ -1,7 +1,7 @@
 """
 Explore precomputed chemical-composition scores with validated, canonical formulas.
 """
-module Eka
+module EkaCompositions
 
 using SQLite
 using DBInterface

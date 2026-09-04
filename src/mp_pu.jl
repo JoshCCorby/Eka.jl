@@ -3,7 +3,7 @@ const PU_METHODS = ("random", "popularity", "similarity")
 const PU_MEMBER_FILES = ("inputs/training.tsv", "inputs/candidates.tsv",
     "evaluation/heldout.tsv", "evaluation/labels.tsv")
 const PU_PRODUCER_FILES = ("src/mp_recovery.jl", "src/mp_audit.jl", "src/compositions.jl",
-    "src/benchmark.jl", "src/Eka.jl", "src/cli.jl", "scripts/export_mp_pilot.py", "Project.toml")
+    "src/benchmark.jl", "src/EkaCompositions.jl", "src/cli.jl", "scripts/export_mp_pilot.py", "Project.toml")
 
 pu_check(condition, message) = condition || throw(ArgumentError(message))
 function pu_match(actual, expected, label)

@@ -63,7 +63,7 @@ names rather than overwriting a previous artifact.
 ## Julia interfaces
 
 ```julia
-using Eka
+using EkaCompositions
 
 # File API: verifies provenance before saving all frozen real splits.
 report = split_mp_recovery(

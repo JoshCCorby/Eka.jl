@@ -3,7 +3,7 @@ function with_test_database(f; table="compositions", rows=Tuple[])
         path = joinpath(directory, "test.db")
         db = SQLite.DB(path)
         try
-            name = Eka.quote_identifier(table)
+            name = EkaCompositions.quote_identifier(table)
             DBInterface.execute(db, "CREATE TABLE $name (composition TEXT, score REAL)")
             for row in rows
                 DBInterface.execute(db, "INSERT INTO $name VALUES (?, ?)", row)
@@ -20,9 +20,9 @@ end
     all_results = query_compositions(FIXTURE; threshold=0)
     @test length(all_results) == length(FixtureData.ROWS) == 12
     @test eltype(all_results) == Tuple{Composition,Float64}
-    @test (@inferred Eka.parse_scored_row("MgZn", 0.4)) == (Composition("MgZn"), 0.4)
-    filters = Eka.query_filters(["Mg"], [2], 0.01)
-    @test (@inferred Eka.matches_filters(Composition("MgZn"), filters))
+    @test (@inferred EkaCompositions.parse_scored_row("MgZn", 0.4)) == (Composition("MgZn"), 0.4)
+    filters = EkaCompositions.query_filters(["Mg"], [2], 0.01)
+    @test (@inferred EkaCompositions.matches_filters(Composition("MgZn"), filters))
     @test issorted(all_results; by=r -> (-r[2], formula(r[1])))
     @test first(all_results) == (Composition("Al2Ba2O7Si1"), 0.74232)
 

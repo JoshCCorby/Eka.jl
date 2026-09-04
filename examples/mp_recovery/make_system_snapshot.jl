@@ -3,7 +3,7 @@
 """Create offline synthetic systems with unequal sizes and mixed labels."""
 module MakeSystemSnapshot
 
-using Eka
+using EkaCompositions
 
 function documents()
     rows = NamedTuple[]

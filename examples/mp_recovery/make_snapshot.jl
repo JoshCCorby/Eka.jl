@@ -3,7 +3,7 @@
 """Create a tiny, explicitly synthetic recovery snapshot without network access."""
 module MakeRecoverySnapshot
 
-using Eka
+using EkaCompositions
 
 function documents()
     rows = NamedTuple[]

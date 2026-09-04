@@ -85,7 +85,7 @@ sandbox for arbitrary third-party code.
 ## Ranker and metric interfaces
 
 ```julia
-using Eka
+using EkaCompositions
 
 training = ["CaTiO3", "BaTiO3"]
 candidates = ["MgTiO3", "SrTiO3", "CaZrO3", "MgAl2O4"]

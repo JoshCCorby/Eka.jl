@@ -1,10 +1,10 @@
-using Eka, SQLite, DBInterface, SHA, Test
+using EkaCompositions, SQLite, DBInterface, SHA, Test
 
 # Independent reference for the supplied original script's strict threshold and
 # element-set semantics. Stream rows instead of retaining the whole source table.
 function reference_query(path; elements, nary, threshold)
     output = Tuple{String,Float64}[]
-    Eka.with_database(path) do db
+    EkaCompositions.with_database(path) do db
         for (n, table) in ((2, "data2"), (3, "data3"), (4, "data4ionic"), (5, "data5ionic"))
             n in nary || continue
             statement = SQLite.Stmt(db, "SELECT * FROM $table WHERE score > ?")

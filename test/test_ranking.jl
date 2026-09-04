@@ -1,7 +1,7 @@
 struct PreferBinary <: AbstractRankingMethod end
-Eka.ranking_value(::PreferBinary, c::Composition, ::Real) = length(c) == 2 ? 1.0 : 0.0
+EkaCompositions.ranking_value(::PreferBinary, c::Composition, ::Real) = length(c) == 2 ? 1.0 : 0.0
 struct InvalidRanking <: AbstractRankingMethod end
-Eka.ranking_value(::InvalidRanking, ::Composition, ::Real) = NaN
+EkaCompositions.ranking_value(::InvalidRanking, ::Composition, ::Real) = NaN
 
 @testset "Pluggable ranking" begin
     a, b = Composition("MgZn"), Composition("Mg2Zn")
