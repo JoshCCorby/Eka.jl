@@ -59,7 +59,7 @@ The Python tests create a synthetic snapshot with unequal system sizes, mixed
 labels and an unlabelled-only system, then execute the entire workflow. They
 reject corruption even when a result-file checksum is rewritten. Synthetic
 results are software tests, not scientific evidence. The generator is
-`examples/mp_recovery/make_system_snapshot.py`; custom seeds/budgets are allowed
+`examples/mp_recovery/make_system_snapshot.jl`; custom seeds/budgets are allowed
 only in explicitly synthetic runs.
 
 The tracked protocol is immutable after its freeze; fixes to code must preserve

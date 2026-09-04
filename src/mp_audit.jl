@@ -1,6 +1,5 @@
 const MP_AUDIT_HEADER = "material_id\tcomposition\ttheoretical\tsource_ids\tnormalization_issue"
-const MP_SNAPSHOT_FIELDS = ["material_id", "composition", "formula_pretty", "theoretical",
-    "database_IDs", "deprecated"]
+const MP_SNAPSHOT_FIELDS = MP_SNAPSHOT_SELECTED_FIELDS
 const MP_SNAPSHOT_STRINGS = Dict(
     "dataset" => "Materials Project",
     "endpoint" => "https://api.materialsproject.org/materials/summary/",
@@ -120,7 +119,8 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
         error isa TOML.ParserError || rethrow()
         throw(ArgumentError("invalid snapshot.toml"))
     end
-    get(metadata, "schema_version", nothing) === 1 || throw(ArgumentError("unsupported MP snapshot schema"))
+    schema_version = get(metadata, "schema_version", nothing)
+    schema_version in (1, 2) || throw(ArgumentError("unsupported MP snapshot schema"))
     get(metadata, "query_include_gnome", nothing) === false || throw(ArgumentError("snapshot must explicitly exclude GNoME"))
     get(metadata, "query_deprecated", nothing) === false || throw(ArgumentError("snapshot must explicitly exclude deprecated records"))
     get(metadata, "query_elements", nothing) == ["O"] || throw(ArgumentError("snapshot must query oxygen"))
@@ -131,14 +131,35 @@ function audit_mp_snapshot(snapshot::AbstractString, output::AbstractString)
     for (key, expected) in MP_SNAPSHOT_STRINGS
         get(metadata, key, nothing) == expected || throw(ArgumentError("snapshot has invalid or missing $key"))
     end
-    for key in ("database_version", "redistribution_status", "retrieved_at_utc",
-            "mp_api_version", "python_version")
+    for key in ("database_version", "redistribution_status", "retrieved_at_utc")
         value = get(metadata, key, nothing)
         value isa String && !isempty(strip(value)) || throw(ArgumentError("snapshot must declare $key"))
     end
-    exporter_hash = get(metadata, "exporter_sha256", nothing)
-    exporter_hash isa String && occursin(r"\A[0-9a-f]{64}\z", exporter_hash) ||
-        throw(ArgumentError("snapshot must declare a valid exporter_sha256"))
+    if schema_version === 1
+        for key in ("mp_api_version", "python_version")
+            value = get(metadata, key, nothing)
+            value isa String && !isempty(strip(value)) || throw(ArgumentError("snapshot must declare $key"))
+        end
+        exporter_hash = get(metadata, "exporter_sha256", nothing)
+        exporter_hash isa String && occursin(r"\A[0-9a-f]{64}\z", exporter_hash) ||
+            throw(ArgumentError("snapshot must declare a valid exporter_sha256"))
+    else
+        get(metadata, "is_synthetic", nothing) === true ||
+            throw(ArgumentError("snapshot schema 2 is restricted to synthetic data"))
+        get(metadata, "producer", nothing) == "Eka.write_synthetic_mp_snapshot" ||
+            throw(ArgumentError("snapshot has an unknown schema 2 producer"))
+        get(metadata, "producer_language", nothing) == "Julia" ||
+            throw(ArgumentError("snapshot schema 2 must declare Julia as its producer language"))
+        for key in ("producer_version", "julia_version")
+            value = get(metadata, key, nothing)
+            value isa String && !isempty(strip(value)) || throw(ArgumentError("snapshot must declare $key"))
+        end
+        producer_hash = get(metadata, "producer_sha256", nothing)
+        producer_hash isa String && occursin(r"\A[0-9a-f]{64}\z", producer_hash) ||
+            throw(ArgumentError("snapshot must declare a valid producer_sha256"))
+        producer_hash == bytes2hex(sha256(read(joinpath(@__DIR__, "mp_snapshot.jl")))) ||
+            throw(ArgumentError("snapshot producer hash differs from the current Julia producer"))
+    end
     records_bytes = read(joinpath(snapshot, "records.tsv"))
     bytes2hex(sha256(records_bytes)) == get(metadata, "records_sha256", nothing) ||
         throw(ArgumentError("records.tsv SHA-256 does not match snapshot metadata"))

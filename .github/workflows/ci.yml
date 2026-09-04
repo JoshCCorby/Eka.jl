@@ -47,7 +47,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
         shell: bash
         run: |
-          python examples/mp_recovery/make_snapshot.py "$RUNNER_TEMP/pu-snapshot"
+          julia --project=. examples/mp_recovery/make_snapshot.jl "$RUNNER_TEMP/pu-snapshot"
           julia --project=. bin/eka audit-mp --snapshot "$RUNNER_TEMP/pu-snapshot" --output "$RUNNER_TEMP/pu-audit"
           julia --project=. bin/eka split-mp --snapshot "$RUNNER_TEMP/pu-snapshot" --audit "$RUNNER_TEMP/pu-audit" --output "$RUNNER_TEMP/pu-splits" --synthetic --budget 1 4
           julia --project=. bin/eka benchmark-pu --splits "$RUNNER_TEMP/pu-splits" --snapshot "$RUNNER_TEMP/pu-snapshot" --audit "$RUNNER_TEMP/pu-audit" --output "$RUNNER_TEMP/pu-results" --synthetic

@@ -87,8 +87,9 @@ To try the complete pipeline without an API key or private data, follow the
 [offline synthetic example](docs/mp-pu-evaluation.md#offline-end-to-end-example).
 It runs fixture generation → audit → split → PU evaluation and produces
 full rankings, fixed-budget recovery metrics, hashes, and reproducibility reports.
-It requires Python 3.11+ and installed Julia dependencies. Output directories must
-be new; synthetic results are not scientific evidence. To measure the similarity
+The core offline pipeline requires only Julia; Python 3.11+ is used for the
+independent saved-output validators. Output directories must be new; synthetic
+results are not scientific evidence. To measure the similarity
 comparator at the size a real split implies, on generated formulas only, run
 `julia --startup-file=no --project=. scripts/benchmark_pu_similarity.jl`.
 
@@ -298,6 +299,7 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 | `src/database.jl`, `src/ranking.jl`, `src/import.jl` | SQLite adapters/audits, query ranking, and scored-record ingestion |
 | `src/benchmark.jl` | Binary labelled ranking benchmarks |
 | `scripts/export_mp_pilot.py`, `src/mp_audit.jl` | MP snapshot export, provenance audit, and composition grouping |
+| `src/mp_snapshot.jl`, `examples/mp_recovery/make_snapshot.jl` | Julia-native offline synthetic snapshot generation |
 | `src/mp_recovery.jl` | Deterministic PU splits and preserved provenance |
 | `src/mp_pu.jl` | Split verification, training-only ranking methods, recovery metrics, and reports |
 | `scripts/analyze_pu_pilot.py` | Independent saved-output validation and predefined descriptive pilot analysis |
@@ -305,6 +307,7 @@ The benchmark reports first-query and warm-query time/allocations separately; pa
 | `scripts/analyze_label_sensitivity.py` | Independent sensitivity validation, policy comparisons, and population reporting |
 | `src/mp_system_holdout.jl`, `scripts/run_system_holdout.jl` | Versioned whole-system splits, composition controls and population/similarity diagnostics |
 | `scripts/analyze_system_holdout.py` | Independent v2 membership, ranking, metric and diagnostic checks |
+| `scripts/inspect_external_scores.jl` | Read-only external-score coverage inspection |
 | `src/element_pair_model.jl`, `src/mp_element_pair.jl` | Training-only pair-factor fitting and isolated learned-comparator evaluation |
 | `scripts/run_pair_feasibility.jl`, `scripts/run_element_pair.jl`, `scripts/analyze_element_pair.py` | Synthetic feasibility, frozen learned evaluation and independent validation |
 | `src/cli.jl`, `bin/eka` | Command parsing/output; only `bin/eka` exits the process |

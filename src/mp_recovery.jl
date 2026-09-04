@@ -148,11 +148,14 @@ function recovery_verified_inputs(snapshot, audit; synthetic)
                 throw(ArgumentError("$name does not match the frozen recovery protocol"))
         end
     end
-    # Require the exporting implementation too; a digest written by unknown code
-    # is not silently treated as sufficient provenance.
-    exporter = read(joinpath(@__DIR__, "..", "scripts", "export_mp_pilot.py"))
-    get(metadata, "exporter_sha256", nothing) == bytes2hex(sha256(exporter)) ||
-        throw(ArgumentError("snapshot exporter hash differs from the current exporter"))
+    # Real and legacy synthetic schema-v1 snapshots bind to the reviewed Python
+    # exporter. Schema v2 is synthetic-only and its Julia producer is validated
+    # by audit_mp_snapshot before any membership is constructed.
+    if get(metadata, "schema_version", nothing) === 1
+        exporter = read(joinpath(@__DIR__, "..", "scripts", "export_mp_pilot.py"))
+        get(metadata, "exporter_sha256", nothing) == bytes2hex(sha256(exporter)) ||
+            throw(ArgumentError("snapshot exporter hash differs from the current exporter"))
+    end
     supplied = recovery_toml(files["audit/audit.toml"], "audit")
     groups = recovery_group_rows(files["audit/compositions.tsv"])
     # Reaudit captured bytes, not mutable input paths. Current audit code verifies

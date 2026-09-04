@@ -17,13 +17,13 @@ record; its statement that the CLI was not yet available describes the freeze da
 
 ## Offline end-to-end example
 
-Run from the repository root with Python 3.11+ and installed Julia dependencies.
-No MP client, API key, or private data is required. Every output directory must be
-new; change the names when repeating this example.
+Run from the repository root with installed Julia dependencies. No Python,
+MP client, API key, or private data is required for this core pipeline. Every
+output directory must be new; change the names when repeating this example.
 
 ```sh
 mkdir -p reports/local
-python3 examples/mp_recovery/make_snapshot.py reports/local/pu-example-snapshot
+julia --project=. examples/mp_recovery/make_snapshot.jl reports/local/pu-example-snapshot
 julia --project=. bin/eka audit-mp \
   --snapshot reports/local/pu-example-snapshot \
   --output reports/local/pu-example-audit

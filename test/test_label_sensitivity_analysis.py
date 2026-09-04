@@ -17,7 +17,9 @@ class SensitivityAnalysisTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
         cls.base = Path(cls.temp.name)
-        subprocess.run([sys.executable, str(ROOT / "examples/mp_recovery/make_snapshot.py"), "snapshot"], cwd=cls.base, check=True, capture_output=True)
+        subprocess.run(["julia", "--startup-file=no", f"--project={ROOT}",
+                        str(ROOT / "examples/mp_recovery/make_snapshot.jl"), "snapshot"],
+                       cwd=cls.base, check=True, capture_output=True)
         julia = ["julia", "--startup-file=no", f"--project={ROOT}"]
         for args in [
             [str(ROOT / "bin/eka"), "audit-mp", "--snapshot", "snapshot", "--output", "audit"],

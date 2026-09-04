@@ -30,13 +30,13 @@ unresolved.
 
 ## Offline synthetic example
 
-Python 3.11+ standard library is sufficient to create the fixture; no `mp-api`,
-API key, network query, or private data is needed. Julia dependencies must already
-be installed. Run from the repository root:
+The fixture generator is Julia-native; no Python, `mp-api`, API key, network
+query, or private data is needed. Julia dependencies must already be installed.
+Run from the repository root:
 
 ```sh
 mkdir -p reports/local
-python3 examples/mp_recovery/make_snapshot.py reports/local/recovery-example-snapshot
+julia --project=. examples/mp_recovery/make_snapshot.jl reports/local/recovery-example-snapshot
 julia --project=. bin/eka audit-mp \
   --snapshot reports/local/recovery-example-snapshot \
   --output reports/local/recovery-example-audit

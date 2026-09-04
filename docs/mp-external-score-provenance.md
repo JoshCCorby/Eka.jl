@@ -45,7 +45,7 @@ all, so the score set and the recovery pool overlap weakly in both directions.
 Reproduce the table with the read-only inspection script; both inputs stay local:
 
 ```bash
-python3 scripts/inspect_external_scores.py --scores /path/to/recommender-2024-07-01.sqlite --audit reports/local/mp-ternary-audit/compositions.tsv
+julia --project=. scripts/inspect_external_scores.jl --scores /path/to/recommender-2024-07-01.sqlite --audit reports/local/mp-ternary-audit/compositions.tsv
 ```
 
 ## Why this fails the eligibility gate

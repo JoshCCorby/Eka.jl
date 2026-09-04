@@ -15,7 +15,9 @@ class SystemAnalysisTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory();cls.base=Path(cls.temp.name)
-        subprocess.run([sys.executable,str(ROOT/"examples/mp_recovery/make_system_snapshot.py"),"snapshot"],cwd=cls.base,check=True,capture_output=True)
+        subprocess.run(["julia", "--startup-file=no", f"--project={ROOT}",
+                        str(ROOT/"examples/mp_recovery/make_system_snapshot.jl"), "snapshot"],
+                       cwd=cls.base, check=True, capture_output=True)
         code='''using Eka
 include(joinpath(ARGS[1],"src","mp_system_holdout.jl"))
 audit_mp_snapshot("snapshot","audit")

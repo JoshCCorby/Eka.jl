@@ -19,7 +19,9 @@ class PilotAnalysisTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temp = tempfile.TemporaryDirectory()
         cls.base = Path(cls.temp.name)
-        subprocess.run(["python3", str(ROOT / "examples/mp_recovery/make_snapshot.py"), str(cls.base / "snapshot")], check=True, capture_output=True)
+        subprocess.run(["julia", "--startup-file=no", f"--project={ROOT}",
+                        str(ROOT / "examples/mp_recovery/make_snapshot.jl"),
+                        str(cls.base / "snapshot")], check=True, capture_output=True)
         commands = [
             ["audit-mp", "--snapshot", "snapshot", "--output", "audit"],
             ["split-mp", "--snapshot", "snapshot", "--audit", "audit", "--output", "splits", "--synthetic", "--budget", "1", "4"],

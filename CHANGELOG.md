@@ -11,3 +11,6 @@
   source-release content audit.
 - Reconcile preserved MP JSONL records with normalized TSV inputs during audit,
   enforce the exporter metadata contract, and reject special release members.
+- Add Julia-native synthetic snapshot generation and external-score coverage
+  inspection while retaining Python for the optional MP API adapter and
+  independent saved-output validation.
