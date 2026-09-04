@@ -1,7 +1,7 @@
 # Synthetic development only: accepts no real-data, membership or label paths.
-include(joinpath(@__DIR__,"..","src","element_pair_model.jl"))
-using .ElementPairModel, EkaCompositions, SHA, TOML
-const EP=ElementPairModel
+using EkaCompositions, SHA, TOML
+const EP=EkaCompositions.Research.ElementPairModel
+const ElementPairModel=EP
 
 function small_case()
     communities=(("Li","Na","K","Rb"),("Mg","Ca","Sr","Ba"))

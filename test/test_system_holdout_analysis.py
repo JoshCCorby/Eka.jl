@@ -19,7 +19,7 @@ class SystemAnalysisTests(unittest.TestCase):
                         str(ROOT/"examples/mp_recovery/make_system_snapshot.jl"), "snapshot"],
                        cwd=cls.base, check=True, capture_output=True)
         code='''using EkaCompositions
-include(joinpath(ARGS[1],"src","mp_system_holdout.jl"))
+const MPSystemHoldout = EkaCompositions.Research.MPSystemHoldout
 audit_mp_snapshot("snapshot","audit")
 split_mp_recovery("snapshot","audit","splits";synthetic=true,seeds=0:2,budgets=[1,4])
 benchmark_pu("splits","snapshot","audit","pilot";synthetic=true)

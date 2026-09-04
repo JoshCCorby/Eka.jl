@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Research modules (`mp_label_sensitivity.jl`, `mp_system_holdout.jl`,
+  `element_pair_model.jl`, `mp_element_pair.jl`) are now loaded by the package as
+  an internal `EkaCompositions.Research` namespace instead of being included
+  manually by each script and test. Source paths are unchanged, so provenance
+  manifest keys stay comparable with earlier runs; recorded
+  `implementation_hashes` values change, as they do for any source edit. Nothing
+  is exported and no research subcommand is added to the CLI, so the frozen v1
+  query, ranking and `benchmark-pu` surfaces are unaffected.
+- Removed the nested `include` calls that previously caused a single session to
+  define more than one copy of `MPLabelSensitivity` and `MPSystemHoldout`.
+
+### Added
+
+- Tests for `mp_element_pair.jl`, which had no coverage: protocol and baseline
+  pin shape, output-overwrite guards, sibling module identity, and a check that
+  every path recorded in a provenance manifest resolves on disk.
+
 ## [0.1.0] - 2026-09-04
 
 ### Added

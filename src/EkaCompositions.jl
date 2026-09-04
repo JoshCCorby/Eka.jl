@@ -32,6 +32,21 @@ include("mp_audit.jl")
 include("mp_recovery.jl")
 include("mp_pu.jl")
 include("cli.jl")
+
+"""
+Internal research modules. Versioned experiments that build on the frozen v1 CLI
+and ranking algorithms without altering them. Nothing here is exported, and no
+subcommand is wired into `cli.jl`; reach them as
+`EkaCompositions.Research.MPSystemHoldout` and friends. Interfaces here may
+change between releases without a breaking version bump.
+"""
+module Research
+    include("mp_label_sensitivity.jl")
+    include("mp_system_holdout.jl")
+    include("element_pair_model.jl")
+    include("mp_element_pair.jl")
+end
+
 include("precompile.jl")
 
 end

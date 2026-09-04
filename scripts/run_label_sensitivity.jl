@@ -1,6 +1,6 @@
 # Research entry point; the v1 benchmark-pu CLI is intentionally unchanged.
-include(joinpath(@__DIR__, "..", "src", "mp_label_sensitivity.jl"))
-using .MPLabelSensitivity
+using EkaCompositions
+const MPLabelSensitivity = EkaCompositions.Research.MPLabelSensitivity
 
 function main(args)
     synthetic = length(args) == 5 && last(args) == "--synthetic"

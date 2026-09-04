@@ -1,7 +1,8 @@
-"""Follow-on label sensitivity; loaded explicitly by the research script, not v1's CLI."""
+"""Follow-on label sensitivity; an internal research module, deliberately outside v1's CLI."""
 module MPLabelSensitivity
 
-using EkaCompositions, SHA, TOML
+using ...EkaCompositions
+using SHA, TOML
 
 const PROTOCOL = "eka-mp-label-sensitivity-v1"
 const POLICIES = ("original", "exclude_mixed", "unlabel_mixed")

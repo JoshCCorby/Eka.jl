@@ -1,4 +1,4 @@
-include(joinpath(@__DIR__, "..", "src", "mp_label_sensitivity.jl"))
+const MPLabelSensitivity = EkaCompositions.Research.MPLabelSensitivity
 using .MPLabelSensitivity
 const LS = MPLabelSensitivity
 

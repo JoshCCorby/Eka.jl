@@ -1,6 +1,7 @@
-"""Synthetic-stage element-pair factor model; loaded explicitly, outside the frozen CLI."""
+"""Synthetic-stage element-pair factor model; an internal research module, outside the frozen CLI."""
 module ElementPairModel
-using EkaCompositions, SHA
+using ...EkaCompositions
+using SHA
 
 const MODEL_ID="eka-element-pair-symnmf-v1"
 const ELEMENTS=sort!([e for e in EkaCompositions.ELEMENT_SYMBOLS if e!="O"])

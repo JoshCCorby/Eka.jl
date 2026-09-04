@@ -15,8 +15,10 @@ the sensitivity checksum is
 
 ## Entry points
 
-The dedicated research runner loads `src/mp_label_sensitivity.jl` explicitly,
-so no new mode or policy is silently added to v1's `benchmark-pu` CLI. It verifies
+The dedicated research runner reaches this module as
+`EkaCompositions.Research.MPLabelSensitivity`. Research modules are internal and
+unexported, and no research subcommand is wired into `src/cli.jl`, so no new mode
+or policy is silently added to v1's `benchmark-pu` CLI. It verifies
 the snapshot, audit and captured original pilot bundle before running anything
 new. Every original ranking, metric and raw report is recomputed and compared
 byte for byte as a compatibility check. Evaluation-only branches then consume

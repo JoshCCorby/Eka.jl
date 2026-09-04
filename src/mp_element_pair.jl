@@ -1,8 +1,9 @@
 """Frozen learned-comparator evaluation using previously verified v2 populations."""
 module MPElementPair
-using EkaCompositions, SHA, TOML
-include("mp_system_holdout.jl")
-include("element_pair_model.jl")
+using ...EkaCompositions
+using ..MPSystemHoldout
+using ..ElementPairModel
+using SHA, TOML
 const SH=MPSystemHoldout
 const EP=ElementPairModel
 const PROTOCOL="eka-mp-element-pair-v1"

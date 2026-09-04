@@ -1,8 +1,9 @@
 """Versioned research runner; does not change the v1 CLI or ranking algorithms."""
 module MPSystemHoldout
 
-using EkaCompositions, SHA, TOML
-include("mp_label_sensitivity.jl")
+using ...EkaCompositions
+using ..MPLabelSensitivity
+using SHA, TOML
 const LS = MPLabelSensitivity
 const PROTOCOL = "eka-mp-system-holdout-v2"
 const ALGORITHM = "eka-pu-system-split-v2"

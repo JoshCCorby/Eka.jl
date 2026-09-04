@@ -1,4 +1,4 @@
-include(joinpath(@__DIR__,"..","src","mp_system_holdout.jl"))
+const MPSystemHoldout = EkaCompositions.Research.MPSystemHoldout
 const SH=MPSystemHoldout
 
 function system_test_inputs(dir)

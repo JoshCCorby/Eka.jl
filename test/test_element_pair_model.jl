@@ -1,4 +1,4 @@
-include(joinpath(@__DIR__,"..","src","element_pair_model.jl"))
+const ElementPairModel = EkaCompositions.Research.ElementPairModel
 const EP=ElementPairModel
 
 @testset "Pair-factor objective and gradient" begin

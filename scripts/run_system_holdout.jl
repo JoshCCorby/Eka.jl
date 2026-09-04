@@ -1,5 +1,6 @@
-include(joinpath(@__DIR__,"..","src","mp_system_holdout.jl"))
-using .MPSystemHoldout
+# Research entry point; the v1 benchmark-pu CLI is intentionally unchanged.
+using EkaCompositions
+const MPSystemHoldout = EkaCompositions.Research.MPSystemHoldout
 
 function main(args)
     flags=Set(filter(x->startswith(x,"--"),args))
