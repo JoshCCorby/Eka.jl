@@ -199,6 +199,9 @@ Exported names are classified as stable, stable-CLI, or experimental for the
 
 ## Development
 
+Setup, test commands, the protocol-freeze rules and the distinction between a
+software fix and a new experiment are in [CONTRIBUTING](CONTRIBUTING.md).
+
 ```bash
 julia --project=. -e 'using Pkg; Pkg.test()'
 python3 -m unittest discover -s test -p 'test_*.py'

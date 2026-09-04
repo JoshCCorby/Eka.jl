@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `CONTRIBUTING.md`: setup, the three test commands and the release gate, the
+  frozen protocol documents and provenance paths, the frozen v1 command-line
+  surface, and the distinction between a software fix and a new experiment.
+
 - Aqua.jl package-quality checks in the test suite. This required `[compat]`
   entries for the test-only extras (`Aqua`, `Random`, `Test`), which Aqua's
   dependency check inspects alongside `[deps]`. Method ambiguities, unbound type
