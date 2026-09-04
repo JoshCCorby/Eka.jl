@@ -17,6 +17,8 @@ coverage/
 # Local research snapshots and secrets; publish data only after a licence review.
 data/local/
 reports/local/
+/output/
+/tmp/
 .venv-mp/
 .env
 .env.*
