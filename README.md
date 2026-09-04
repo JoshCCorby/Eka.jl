@@ -272,7 +272,7 @@ The fixture generator refuses to overwrite existing files. To create a separate 
 julia --project=. test/fixtures/build_fixture.jl /path/to/new-fixture.db
 ```
 
-[GitHub Actions](https://github.com/JoshCCorby/Eka.jl/actions/workflows/ci.yml) runs Julia 1.10 and current stable on Linux, current stable on macOS and Windows, and Python 3.11 exporter tests. The current-Julia Linux job also runs the offline Python fixture → Julia audit → split → PU evaluation example. Check the linked workflow for the status of a specific commit.
+[GitHub Actions](https://github.com/JoshCCorby/Eka.jl/actions/workflows/ci.yml) runs Julia 1.10 and current stable on Linux, current stable on macOS and Windows, and Python 3.11 exporter and independent-analysis tests. The current-Julia Linux job also runs the offline Julia fixture → audit → split → PU evaluation example. Check the linked workflow for the status of a specific commit.
 
 ## SQLite query performance
 
